@@ -1,0 +1,6 @@
+Scala GitHub GraphQL API Library
+
+Links:
+
+ - [[https://er1c.github.io/scala-github-graphql/ Homepage]]
+ - [[https://github.com/er1c/scala-github-graphql GitHub repository]]
