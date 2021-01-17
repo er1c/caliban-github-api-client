@@ -107,10 +107,7 @@ object Boilerplate {
   /**
     * Configures generated API documentation website.
     */
-  def unidocSettings(projects: ProjectReference*) = Seq(
-    // Only include JVM sub-projects, exclude JS or Native sub-projects
-    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(projects:_*),
-
+  lazy val unidocSettings = Seq(
     scalacOptions in (ScalaUnidoc, unidoc) +=
       "-Xfatal-warnings",
     scalacOptions in (ScalaUnidoc, unidoc) --=

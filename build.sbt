@@ -1,26 +1,21 @@
 import BuildKeys._
 import Boilerplate._
 
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
-import sbtcrossproject.CrossProject
-
 // ---------------------------------------------------------------------------
 // Commands
 
-/* We have no other way to target only JVM or JS projects in tests. */
-lazy val aggregatorIDs = Seq("generated")
-
-addCommandAlias("ci-jvm",     ";" + aggregatorIDs.map(id => s"${id}JVM/clean ;${id}JVM/test:compile ;${id}JVM/test").mkString(";"))
-addCommandAlias("ci-js",      ";" + aggregatorIDs.map(id => s"${id}JS/clean ;${id}JS/test:compile ;${id}JS/test").mkString(";"))
+addCommandAlias("ci-run",     ";clean ;test:compile ;test")
 addCommandAlias("ci-package", ";scalafmtCheckAll ;package")
 addCommandAlias("ci-doc",     ";unidoc ;site/makeMicrosite")
-addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-jvm ;+ci-js ;+package ;ci-doc")
+addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-run ;+package ;ci-doc")
 addCommandAlias("release",    ";+clean ;ci-release ;unidoc ;site/publishMicrosite")
 
-addCommandAlias("generateClient", "project client;calibanGenClient project/schema.graphql client/src/main/scala/github/graphql/Client.scala;")
+addCommandAlias("generateClient", ";project client ;calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName com.github.er1c.github.graphql;")
 
 // ---------------------------------------------------------------------------
 // Dependencies
+
+val CalibanVersion = "0.9.4"
 
 /** Library for unit-testing:
   * [[https://github.com/monix/minitest/]]
@@ -162,7 +157,7 @@ lazy val root = project.in(file("."))
   .configure(defaultPlugins)
   .settings(sharedSettings)
   .settings(doNotPublishArtifact)
-  .settings(unidocSettings(client))
+  .settings(unidocSettings)
   .settings(
     // Try really hard to not execute tasks in parallel ffs
     Global / concurrentRestrictions := Tags.limitAll(1) :: Nil,
@@ -238,10 +233,9 @@ lazy val site = project.in(file("site"))
   }
 
 lazy val client = project
-  .in(file("client"))
-  .enablePlugins(CodegenPlugin)
   .configure(defaultPlugins)
   .settings(sharedSettings)
+  .enablePlugins(CodegenPlugin)
   .settings(doctestTestSettings(DoctestTestFramework.ScalaTest))
   .settings(
     name := "scala-github-graphql",
@@ -250,8 +244,21 @@ lazy val client = project
       "org.scalatest"     %%% "scalatest"        % ScalaTestVersion % Test,
       "org.scalatestplus" %%% "scalacheck-1-14"  % ScalaTestPlusVersion % Test,
       "org.scalacheck"    %%% "scalacheck"       % ScalaCheckVersion % Test,
+      "com.github.ghostdogpr" %% "caliban-client" % CalibanVersion
     ),
   )
+
+lazy val examplePackages = project
+  .in(file("examples/packages"))
+  .configure(defaultPlugins)
+  .settings(sharedSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % "2.1.5",
+      "com.github.ghostdogpr" %% "caliban-http4s" % CalibanVersion,
+    )
+  )
+  .dependsOn(client)
 
 // Reloads build.sbt changes whenever detected
 Global / onChangedBuildSource := ReloadOnSourceChanges
