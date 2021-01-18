@@ -17,49 +17,30 @@
 
 package examples.packages
 
+import caliban.client.CalibanClientError
 import com.github.er1c.github.graphql.Client
 import sttp.client._
-import sttp.client.asynchttpclient.zio.{ AsyncHttpClientZioBackend, SttpClient }
+import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio._
+import zio.console._
 
 object Main extends App {
-  import Client._
+  //import Client._
 
   override def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] = {
-//    val character = {
-//      import caliban.client.Client.Character._
-//      (name ~
-//        nicknames ~
-//        origin ~
-//        role(
-//          Captain.shipName.map(Role.Captain),
-//          Engineer.shipName.map(Role.Engineer),
-//          Mechanic.shipName.map(Role.Mechanic),
-//          Pilot.shipName.map(Role.Pilot)
-//        )).mapN(Character)
-//    }
-//    val query =
-//      Queries.characters(None) {
-//        character
-//      } ~
-//        Queries.character("Amos Burton") {
-//          character
-//        } ~
-//        Queries.character("Naomi Nagata") {
-//          character
-//        }
-//    val mutation = Mutations.deleteCharacter("James Holden")
-//
-//    def send[T](req: Request[Either[CalibanClientError, T], Nothing]): RIO[Console with SttpClient, T] =
-//      SttpClient.send(req).map(_.body).absolve.tap(res => putStrLn(s"Result: $res"))
-//
-//    val uri   = uri"http://localhost:8088/api/graphql"
-//    val call1 = send(mutation.toRequest(uri))
-//    val call2 = send(query.toRequest(uri, useVariables = true))
-//
-//    (call1 *> call2)
-//      .provideCustomLayer(AsyncHttpClientZioBackend.layer())
-//      .exitCode
+
+    val query =
+      Client.Repository.nameWithOwner -> "scala-github-graphql"
+
+    def send[T](req: Request[Either[CalibanClientError, T], Nothing]): RIO[Console with SttpClient, T] =
+      SttpClient.send(req).map(_.body).absolve.tap(res => putStrLn(s"Result: $res"))
+
+    val uri   = uri"http://localhost:8088/api/graphql"
+    val call2 = send(query.toRequest(uri, useVariables = true))
+
+    (call1 *> call2)
+      .provideCustomLayer(AsyncHttpClientZioBackend.layer())
+      .exitCode
     ???
   }
 }
