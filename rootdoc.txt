@@ -1,6 +1,6 @@
-Scala GitHub GraphQL API Library
+Caliban GitHub GraphQL API Client
 
 Links:
 
- - [[https://er1c.github.io/scala-github-graphql/ Homepage]]
- - [[https://github.com/er1c/scala-github-graphql GitHub repository]]
+ - [[https://er1c.github.io/caliban-github-api-client/ Homepage]]
+ - [[https://github.com/er1c/caliban-github-api-client GitHub repository]]

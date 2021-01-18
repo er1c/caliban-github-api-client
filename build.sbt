@@ -54,11 +54,11 @@ def defaultPlugins: Project ⇒ Project = pr => {
 }
 
 lazy val sharedSettings = Seq(
-  projectTitle := "Scala GitHub GraphQL API Library",
+  projectTitle := "Caliban GitHub GraphQL API Client",
   projectWebsiteRootURL := "https://er1c.github.io/",
-  projectWebsiteBasePath := "/scala-github-graphql/",
+  projectWebsiteBasePath := "/caliban-github-api-client/",
   githubOwnerID := "er1c",
-  githubRelativeRepositoryID := "scala-github-graphql",
+  githubRelativeRepositoryID := "caliban-github-api-client",
 
   organization := "com.github.er1c",
   scalaVersion := "2.13.3",
@@ -238,7 +238,8 @@ lazy val client = project
   .enablePlugins(CodegenPlugin)
   .settings(doctestTestSettings(DoctestTestFramework.ScalaTest))
   .settings(
-    name := "scala-github-graphql",
+    name       := projectTitle.value,
+    moduleName := "caliban-github-api-client",
     libraryDependencies ++= Seq(
       // For testing
       "org.scalatest"     %%% "scalatest"        % ScalaTestVersion % Test,

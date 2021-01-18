@@ -17,30 +17,36 @@
 
 package examples.packages
 
-import caliban.client.CalibanClientError
 import com.github.er1c.github.graphql.Client
 import sttp.client._
 import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
+import sttp.model.Header
 import zio._
 import zio.console._
 
 object Main extends App {
-  //import Client._
-
   override def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] = {
+    import Client._
 
-    val query =
-      Client.Repository.nameWithOwner -> "scala-github-graphql"
+    val license = {
+      import License._
+      id ~
+        key ~
+        name
+    }
 
-    def send[T](req: Request[Either[CalibanClientError, T], Nothing]): RIO[Console with SttpClient, T] =
-      SttpClient.send(req).map(_.body).absolve.tap(res => putStrLn(s"Result: $res"))
+    val query = Query.licenses {
+      license
+    }
 
-    val uri   = uri"http://localhost:8088/api/graphql"
-    val call2 = send(query.toRequest(uri, useVariables = true))
+    val uri = uri"https://api.github.com/graphql"
 
-    (call1 *> call2)
+    SttpClient
+      .send(query.toRequest(uri).headers(Header("Authorization", "Bearer " + sys.env("GITHUB_TOKEN"))))
+      .map(_.body)
+      .absolve
+      .tap(res => putStrLn(s"Result: $res"))
       .provideCustomLayer(AsyncHttpClientZioBackend.layer())
-      .exitCode
-    ???
+      .foldM(ex => putStrLn(ex.toString).as(ExitCode.failure), _ => ZIO.succeed(ExitCode.success))
   }
 }

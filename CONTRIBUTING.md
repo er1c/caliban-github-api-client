@@ -1,10 +1,10 @@
-# Contributing to Scala GitHub GraphQL API Library
+# Contributing to Caliban GitHub API Client
 
-The Scala GitHub GraphQL API Library project welcomes contributions from anybody wishing to participate. All code or documentation that is provided must be licensed with the same license that Scala GitHub GraphQL API Library is licensed with (Apache 2.0, see [LICENSE](./LICENSE.md)).
+The Scala Caliban GitHub API Client project welcomes contributions from anybody wishing to participate. All code or documentation that is provided must be licensed with the same license that Caliban GitHub API Client is licensed with (Apache 2.0, see [LICENSE](./LICENSE.md)).
 
 ## Code of Conduct
 
-People are expected to follow the [Scala Code of Conduct](./CODE_OF_CONDUCT.md) when discussing Scala GitHub GraphQL API Library on the Github page, Gitter channel, or other venues.
+People are expected to follow the [Scala Code of Conduct](./CODE_OF_CONDUCT.md) when discussing Caliban GitHub API Client on the Github page, Gitter channel, or other venues.
 
 We hope that our community will be respectful, helpful, and kind. If you find yourself embroiled in a situation that becomes heated, or that fails to live up to our expectations, you should disengage and contact one of the project maintainers in private. We hope to avoid letting minor aggressions and misunderstandings escalate into larger problems.
 
@@ -39,8 +39,8 @@ We hope that our community will be respectful, helpful, and kind. If you find yo
 All code must be licensed under the Apache 2.0 license and all files must include the following copyright header:
 
 ```
-Copyright (c) $today.year the Scala GitHub GraphQL API Library contributors.
-See the project homepage at: https://er1c.github.io/scala-github-graphql/
+Copyright (c) $today.year the Caliban GitHub API Client contributors.
+See the project homepage at: https://er1c.github.io/caliban-github-api-client/
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
