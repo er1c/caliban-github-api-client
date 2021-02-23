@@ -254,6 +254,7 @@ lazy val examples = project
   .in(file("examples"))
   .configure(defaultPlugins)
   .settings(sharedSettings)
+  .settings(doNotPublishArtifact)
   .settings(
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.1.3",
