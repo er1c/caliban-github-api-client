@@ -17,7 +17,7 @@
 
 package examples.packages
 
-import com.github.er1c.github.graphql.Client
+import caliban.client.github.Client
 import sttp.client._
 import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import sttp.model.Header

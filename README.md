@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/er1c/caliban-github-api-client/workflows/build/badge.svg?branch=main)](https://github.com/er1c/caliban-github-api-client/actions?query=branch%3Amain+workflow%3Abuild) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.er1c/caliban-github-api-client_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.er1c/caliban-github-api-client_2.13)
 
-Scala GitHub GraphQL Library based upon [Caliban](https://github.com/ghostdogpr/caliban): *Caliban is a purely functional library for building GraphQL servers and clients in Scala.*
+Scala GitHub GraphQL API Library based upon [Caliban](https://github.com/ghostdogpr/caliban): *Caliban is a purely functional library for building GraphQL servers and clients in Scala.*
 
 ## Usage
 
@@ -11,6 +11,47 @@ The packages are published on Maven Central.
 ```scala
 libraryDependencies += "com.github.er1c" %% "caliban-github-api-client" % "<version>"
 ```
+
+## Example
+
+```scala
+package examples.packages
+
+import caliban.client.github.Client
+import sttp.client._
+import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
+import sttp.model.Header
+import zio._
+import zio.console._
+
+object Main extends App {
+  override def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] = {
+    import Client._
+
+    val license = {
+      import License._
+      id ~
+        key ~
+        name
+    }
+
+    val query = Query.licenses {
+      license
+    }
+
+    val uri = uri"https://api.github.com/graphql"
+
+    SttpClient
+      .send(query.toRequest(uri).headers(Header("Authorization", "Bearer " + sys.env("GITHUB_TOKEN"))))
+      .map(_.body)
+      .absolve
+      .tap(res => putStrLn(s"Result: $res"))
+      .provideCustomLayer(AsyncHttpClientZioBackend.layer())
+      .foldM(ex => putStrLn(ex.toString).as(ExitCode.failure), _ => ZIO.succeed(ExitCode.success))
+  }
+}
+```
+
 
 ## Documentation
 

@@ -10,12 +10,12 @@ addCommandAlias("ci-doc",     ";unidoc ;site/makeMicrosite")
 addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-run ;+package ;ci-doc")
 addCommandAlias("release",    ";+clean ;ci-release ;unidoc ;site/publishMicrosite")
 
-addCommandAlias("generateClient", ";project client ;calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName com.github.er1c.github.graphql;")
+addCommandAlias("generateClient", ";project client ;calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName caliban.client.github;")
 
 // ---------------------------------------------------------------------------
 // Dependencies
 
-val CalibanVersion = "0.9.4"
+val CalibanVersion = "0.9.5"
 
 /** Library for unit-testing:
   * [[https://github.com/monix/minitest/]]
@@ -61,8 +61,8 @@ lazy val sharedSettings = Seq(
   githubRelativeRepositoryID := "caliban-github-api-client",
 
   organization := "com.github.er1c",
-  scalaVersion := "2.13.3",
-  crossScalaVersions := Seq("2.12.12", "2.13.3"),
+  scalaVersion := "2.13.4",
+  crossScalaVersions := Seq("2.12.13", scalaVersion.value),
 
   // More version specific compiler options
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -174,7 +174,7 @@ lazy val site = project.in(file("site"))
     import microsites._
     Seq(
       micrositeName := projectTitle.value,
-      micrositeDescription := "Scala GitHub GraphQL API Library",
+      micrositeDescription := "Scala GitHub API GraphQL Library",
       micrositeAuthor := "Eric Peters",
       micrositeTwitterCreator := "@ericpeters",
       micrositeGithubOwner := githubOwnerID.value,
@@ -242,9 +242,9 @@ lazy val client = project
     moduleName := "caliban-github-api-client",
     libraryDependencies ++= Seq(
       // For testing
-      "org.scalatest"     %%% "scalatest"        % ScalaTestVersion % Test,
-      "org.scalatestplus" %%% "scalacheck-1-14"  % ScalaTestPlusVersion % Test,
-      "org.scalacheck"    %%% "scalacheck"       % ScalaCheckVersion % Test,
+      "org.scalatest"         %%% "scalatest"        % ScalaTestVersion % Test,
+      "org.scalatestplus"     %%% "scalacheck-1-14"  % ScalaTestPlusVersion % Test,
+      "org.scalacheck"        %%% "scalacheck"       % ScalaCheckVersion % Test,
       "com.github.ghostdogpr" %% "caliban-client" % CalibanVersion
     ),
   )
