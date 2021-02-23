@@ -1,7 +1,5 @@
 import BuildKeys._
 
-import com.github.tkawachi.doctest.DoctestPlugin.DoctestTestFramework
-import com.github.tkawachi.doctest.DoctestPlugin.autoImport._
 import sbt._
 import sbt.Keys._
 import sbtunidoc.BaseUnidocPlugin.autoImport.{unidoc, unidocProjectFilter}
@@ -120,15 +118,6 @@ object Boilerplate {
       Seq("-doc-root-content", file("rootdoc.txt").getAbsolutePath),
     scalacOptions in (ScalaUnidoc, unidoc) ++=
       Opts.doc.version(version.value)
-  )
-
-  /**
-    * Settings for `sbt-doctest`, for unit testing ScalaDoc.
-    */
-  def doctestTestSettings(tf: DoctestTestFramework) = Seq(
-    doctestTestFramework := tf,
-    doctestIgnoreRegex := Some(s".*(internal).*"),
-    doctestOnlyCodeBlocksMode := true
   )
 
   /**

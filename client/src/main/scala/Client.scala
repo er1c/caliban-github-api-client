@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020 the Scala GitHub GraphQL API Library contributors.
- * See the project homepage at: https://er1c.github.io/scala-github-graphql/
+ * Copyright (c) 2020 the Caliban GitHub GraphQL API Client contributors.
+ * See the project homepage at: https://er1c.github.io/caliban-github-api-client/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.github.er1c.github.graphql
+package caliban.client.github
 
 import caliban.client.CalibanClientError.DecodingError
 import caliban.client.FieldBuilder._
