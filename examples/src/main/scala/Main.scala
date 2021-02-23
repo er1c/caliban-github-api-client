@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020 the Scala GitHub GraphQL API Library contributors.
- * See the project homepage at: https://er1c.github.io/scala-github-graphql/
+ * Copyright (c) 2020 the Caliban GitHub GraphQL API Client contributors.
+ * See the project homepage at: https://er1c.github.io/caliban-github-api-client/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-package examples.packages
+package examples
 
 import caliban.client.github.Client
-import sttp.client._
-import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-import sttp.model.Header
+import sttp.client3._
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
 import zio.console._
 
@@ -39,14 +38,15 @@ object Main extends App {
       license
     }
 
-    val uri = uri"https://api.github.com/graphql"
-
-    SttpClient
-      .send(query.toRequest(uri).headers(Header("Authorization", "Bearer " + sys.env("GITHUB_TOKEN"))))
-      .map(_.body)
-      .absolve
-      .tap(res => putStrLn(s"Result: $res"))
-      .provideCustomLayer(AsyncHttpClientZioBackend.layer())
-      .foldM(ex => putStrLn(ex.toString).as(ExitCode.failure), _ => ZIO.succeed(ExitCode.success))
+    AsyncHttpClientZioBackend().flatMap { implicit backend =>
+      val uri = uri"https://api.github.com/graphql"
+      query
+        .toRequest(uri)
+        .header("Authorization", s"Bearer ${sys.env("GITHUB_TOKEN")}")
+        .send(backend)
+        .map(_.body)
+        .absolve
+        .tap(res => putStrLn(s"Result: $res"))
+    }.foldM(ex => putStrLn(ex.toString).as(ExitCode.failure), _ => ZIO.succeed(ExitCode.success))
   }
 }

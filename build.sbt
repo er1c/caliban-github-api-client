@@ -4,10 +4,10 @@ import Boilerplate._
 // ---------------------------------------------------------------------------
 // Commands
 
-addCommandAlias("ci-run",     ";clean ;test:compile ;test")
-addCommandAlias("ci-package", ";scalafmtCheckAll ;package")
-addCommandAlias("ci-doc",     ";unidoc ;site/makeMicrosite")
-addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-run ;+package ;ci-doc")
+addCommandAlias("ci-jvm",     ";clean ;test:compile ;test")
+addCommandAlias("ci-package", ";scalafmtCheckAll ;+package")
+addCommandAlias("ci-doc",     ";+unidoc ;site/makeMicrosite")
+addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-run ;+package; ci-doc")
 addCommandAlias("release",    ";+clean ;ci-release ;unidoc ;site/publishMicrosite")
 
 addCommandAlias("generateClient", ";project client ;calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName caliban.client.github;")
@@ -145,7 +145,6 @@ lazy val sharedSettings = Seq(
   // -- Settings meant for deployment on oss.sonatype.org
   sonatypeProfileName := organization.value,
 ) ++
-  doctestTestSettings(DoctestTestFramework.ScalaTest) ++
   filterOutMultipleDependenciesFromGeneratedPomXml(
     "groupId" -> "org.scoverage".r :: Nil,
     "groupId" -> "org.typelevel".r :: "artifactId" -> "simulacrum".r :: Nil,
@@ -153,7 +152,7 @@ lazy val sharedSettings = Seq(
 
 lazy val root = project.in(file("."))
   .enablePlugins(ScalaUnidocPlugin)
-  .aggregate(client)
+  .aggregate(client, examples)
   .configure(defaultPlugins)
   .settings(sharedSettings)
   .settings(doNotPublishArtifact)
@@ -235,8 +234,8 @@ lazy val site = project.in(file("site"))
 lazy val client = project
   .configure(defaultPlugins)
   .settings(sharedSettings)
+  .disablePlugins(ScalafmtPlugin)
   .enablePlugins(CodegenPlugin)
-  .settings(doctestTestSettings(DoctestTestFramework.ScalaTest))
   .settings(
     name       := projectTitle.value,
     moduleName := "caliban-github-api-client",
@@ -247,15 +246,17 @@ lazy val client = project
       "org.scalacheck"        %%% "scalacheck"       % ScalaCheckVersion % Test,
       "com.github.ghostdogpr" %% "caliban-client" % CalibanVersion
     ),
+    // https://docs.github.com/public/schema.docs.graphql
+    // calibanGenClient src/main/resources/schema.docs.graphql src/main/scala/graphql/GithubApi.scala
   )
 
-lazy val examplePackages = project
-  .in(file("examples/packages"))
+lazy val examples = project
+  .in(file("examples"))
   .configure(defaultPlugins)
   .settings(sharedSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % "2.1.5",
+      "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.1.3",
       "com.github.ghostdogpr" %% "caliban-http4s" % CalibanVersion,
     )
   )
