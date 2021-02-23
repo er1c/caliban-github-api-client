@@ -60,7 +60,7 @@ lazy val sharedSettings = Seq(
   githubOwnerID := "er1c",
   githubRelativeRepositoryID := "caliban-github-api-client",
 
-  organization := "com.github.er1c",
+  organization := "io.github.er1c",
   scalaVersion := "2.13.4",
   crossScalaVersions := Seq("2.12.13", scalaVersion.value),
 

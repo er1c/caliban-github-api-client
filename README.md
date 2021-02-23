@@ -1,6 +1,6 @@
 # Caliban GitHub GraphQL API Client
 
-[![Build](https://github.com/er1c/caliban-github-api-client/workflows/build/badge.svg?branch=main)](https://github.com/er1c/caliban-github-api-client/actions?query=branch%3Amain+workflow%3Abuild) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.er1c/caliban-github-api-client_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.er1c/caliban-github-api-client_2.13)
+[![Build](https://github.com/er1c/caliban-github-api-client/workflows/build/badge.svg?branch=main)](https://github.com/er1c/caliban-github-api-client/actions?query=branch%3Amain+workflow%3Abuild) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.er1c/caliban-github-api-client_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.er1c/caliban-github-api-client_2.13)
 
 Scala GitHub GraphQL API Library based upon [Caliban](https://github.com/ghostdogpr/caliban): *Caliban is a purely functional library for building GraphQL servers and clients in Scala.*
 
@@ -9,7 +9,7 @@ Scala GitHub GraphQL API Library based upon [Caliban](https://github.com/ghostdo
 The packages are published on Maven Central.
 
 ```scala
-libraryDependencies += "com.github.er1c" %% "caliban-github-api-client" % "<version>"
+libraryDependencies += "io.github.er1c" %% "caliban-github-api-client" % "<version>"
 ```
 
 ## Example
