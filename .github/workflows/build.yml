@@ -33,42 +33,14 @@ jobs:
           SCALA_VERSION: ${{ matrix.scala }}
           SBT_COMMAND: ${{ matrix.command }}
 
-  js-tests:
-    name: JS (scala ${{ matrix.scala }}, scala.js ${{ matrix.scalajs }}, jvm ${{ matrix.java }})
-    strategy:
-      fail-fast: true      
-      matrix:
-        os: [ubuntu-20.04]
-        java: [11]
-        scala: [2.12.12, 2.13.3]
-        scalajs: [0.6.33, 1.2.0]
-        command: [ci-js]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: olafurpg/setup-scala@v5
-        with:
-          java-version: "adopt@1.${{ matrix.java }}"
-
-      - name: sbt ++${{ matrix.scala }} ${{ matrix.command }}
-        run: |
-          ./.github/scripts/build.sh
-        env:
-          SCALA_VERSION: ${{ matrix.scala }}
-          SCALAJS_VERSION: ${{ matrix.scalaJS }}
-          SBT_COMMAND: ${{ matrix.command }}
-
   package-tests:
-    name: Package (scala ${{ matrix.scala }}, scala.js ${{ matrix.scalajs }}, jvm ${{ matrix.java }})
+    name: Package (scala ${{ matrix.scala }}, jvm ${{ matrix.java }})
     strategy:
       fail-fast: true      
       matrix:
         os: [ubuntu-20.04]
         java: [11]
         scala: [2.12.12, 2.13.3]
-        scalajs: [0.6.33, 1.2.0]
         command: [ci-package]
 
     runs-on: ${{ matrix.os }}
@@ -84,18 +56,16 @@ jobs:
           ./.github/scripts/build.sh
         env:
           SCALA_VERSION: ${{ matrix.scala }}
-          SCALAJS_VERSION: ${{ matrix.scalaJS }}
           SBT_COMMAND: ${{ matrix.command }}
 
   doc-tests:
-    name: Docs (scala ${{ matrix.scala }}, scala.js ${{ matrix.scalajs }}, jvm ${{ matrix.java }})
+    name: Docs (scala ${{ matrix.scala }}, jvm ${{ matrix.java }})
     strategy:
       fail-fast: true
       matrix:
         os: [ubuntu-20.04]
         java: [11]
         scala: [2.13.3]
-        scalajs: [1.2.0]
         command: ["ci-doc"]
 
     runs-on: ${{ matrix.os }}
@@ -120,7 +90,6 @@ jobs:
           ./.github/scripts/build.sh
         env:
           SCALA_VERSION: ${{ matrix.scala }}
-          SCALAJS_VERSION: ${{ matrix.scalaJS }}
           SBT_COMMAND: ${{ matrix.command }}
 
   #-----------------------------------------------------------------------------------
@@ -130,12 +99,11 @@ jobs:
   publish_sonatype:
     name: Publish to Sonatype
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    needs: [ jvm-tests, js-tests, package-tests, doc-tests ]
+    needs: [ jvm-tests, package-tests, doc-tests ]
     strategy:
       fail-fast: true      
       max-parallel: 1
       matrix:
-        scalajs: ["", 0.6.33, 1.2.0]
         command: [ci-release]
 
     runs-on: ubuntu-20.04
@@ -158,16 +126,14 @@ jobs:
         env:
           PGP_SECRET: ${{secrets.PGP_SECRET}}
 
-      - name: SCALAJS_VERSION=${{ matrix.scalajs }} sbt ci-release
+      - name: sbt ci-release
         run: |
-          echo "SCALAJS_VERSION=$SCALAJS_VERSION"
           sbt +clean ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SCALAJS_VERSION: ${{ matrix.scalaJS }}
 
   publish_microsite:
     name: Publish Website
