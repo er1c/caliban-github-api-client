@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 the Caliban GitHub GraphQL API Client contributors.
+ * Copyright (c) 2020 the Caliban GitHub API Client contributors.
  * See the project homepage at: https://er1c.github.io/caliban-github-api-client/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36981,4 +36981,3 @@ either curated or that have been selected automatically based on popularity.
   }
 
 }
-

@@ -1,5 +1,7 @@
 import BuildKeys._
 
+import com.github.tkawachi.doctest.DoctestPlugin.DoctestTestFramework
+import com.github.tkawachi.doctest.DoctestPlugin.autoImport._
 import sbt._
 import sbt.Keys._
 import sbtunidoc.BaseUnidocPlugin.autoImport.{unidoc, unidocProjectFilter}
@@ -105,7 +107,10 @@ object Boilerplate {
   /**
     * Configures generated API documentation website.
     */
-  lazy val unidocSettings = Seq(
+  def unidocSettings(projects: ProjectReference*) = Seq(
+    // Only include JVM sub-projects, exclude JS or Native sub-projects
+    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(projects:_*),
+
     scalacOptions in (ScalaUnidoc, unidoc) +=
       "-Xfatal-warnings",
     scalacOptions in (ScalaUnidoc, unidoc) --=
@@ -121,26 +126,12 @@ object Boilerplate {
   )
 
   /**
-    * For macros that work across Scala versions.
+    * Settings for `sbt-doctest`, for unit testing ScalaDoc.
     */
-  def requiredMacroCompatDeps(macroParadiseVersion: String) = Seq(
-    needsScalaMacroParadise := {
-      val sv = scalaVersion.value
-      (sv startsWith "2.11.") || (sv startsWith "2.12.") || (sv == "2.13.0-M3")
-    },
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value % Compile,
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value % Provided,
-    ),
-    libraryDependencies ++= {
-      if (needsScalaMacroParadise.value)
-        Seq(compilerPlugin("org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch))
-      else
-        Nil
-    },
-    scalacOptions ++= {
-      if (needsScalaMacroParadise.value) Nil
-      else Seq("-Ymacro-annotations")
-    }
+  def doctestTestSettings(tf: DoctestTestFramework) = Seq(
+    doctestTestFramework := tf,
+    doctestIgnoreRegex := Some(s".*(internal).*"),
+    doctestOnlyCodeBlocksMode := true
   )
+
 }
