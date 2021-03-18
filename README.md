@@ -9,8 +9,10 @@ Scala GitHub GraphQL API Library based upon [Caliban](https://github.com/ghostdo
 The packages are published on Maven Central.
 
 ```scala
-libraryDependencies += "io.github.er1c" %% "caliban-github-api-client" % "<version>"
+libraryDependencies += "io.github.er1c" %%% "caliban-github-api-client" % "<version>"
 ```
+
+Cross-builds are available for Scala 2.12.13 and 2.13.4. Scala.js 1.5.0 supported.
 
 ## Example
 
