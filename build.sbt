@@ -1,16 +1,27 @@
 import BuildKeys._
 import Boilerplate._
 
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+import sbtcrossproject.CrossProject
+
 // ---------------------------------------------------------------------------
 // Commands
 
-addCommandAlias("ci-jvm",     ";clean ;test:compile ;test")
-addCommandAlias("ci-package", ";scalafmtCheckAll ;+package")
-addCommandAlias("ci-doc",     ";+unidoc ;site/makeMicrosite")
-addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-run ;+package; ci-doc")
+
+/* We have no other way to target only JVM or JS projects in tests. */
+lazy val aggregatorIDs = Seq("client")
+
+addCommandAlias("ci-jvm",     ";" + aggregatorIDs.map(id => s"${id}JVM/clean ;${id}JVM/test:compile ;${id}JVM/test").mkString(";"))
+addCommandAlias("ci-js",      ";" + aggregatorIDs.map(id => s"${id}JS/clean ;${id}JS/test:compile ;${id}JS/test").mkString(";"))
+addCommandAlias("ci-package", ";scalafmtCheckAll ;package")
+addCommandAlias("ci-doc",     ";unidoc ;site/makeMicrosite")
+addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-jvm ;+ci-js ;+package ;ci-doc")
 addCommandAlias("release",    ";+clean ;ci-release ;unidoc ;site/publishMicrosite")
 
-addCommandAlias("generateClient", ";project client ;calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName caliban.client.github;")
+lazy val genCmd: String =
+  "calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName caliban.client.github"
+
+addCommandAlias("generateClient", s";project root ; $genCmd")
 
 // ---------------------------------------------------------------------------
 // Dependencies
@@ -25,20 +36,10 @@ val CalibanVersion = "0.9.5"
 val ScalaTestVersion = "3.2.2"
 val ScalaTestPlusVersion = "3.2.2.0"
 
-/** Library for property-based testing:
-  * [[https://www.scalacheck.org/]]
-  */
-val ScalaCheckVersion = "1.14.3"
-
 /** Compiler plugin for silencing compiler warnings:
   * [[https://github.com/ghik/silencer]]
   */
 val SilencerVersion = "1.7.1"
-
-/** Used for publishing the microsite:
-  * [[https://github.com/47degrees/github4s]]
-  */
-val GitHub4sVersion = "0.26.0"
 
 /**
   * Defines common plugins between all projects.
@@ -54,7 +55,7 @@ def defaultPlugins: Project ⇒ Project = pr => {
 }
 
 lazy val sharedSettings = Seq(
-  projectTitle := "Caliban GitHub GraphQL API Client",
+  projectTitle := "Caliban GitHub API Client",
   projectWebsiteRootURL := "https://er1c.github.io/",
   projectWebsiteBasePath := "/caliban-github-api-client/",
   githubOwnerID := "er1c",
@@ -62,7 +63,7 @@ lazy val sharedSettings = Seq(
 
   organization := "io.github.er1c",
   scalaVersion := "2.13.4",
-  crossScalaVersions := Seq("2.12.13", scalaVersion.value),
+  crossScalaVersions := Seq("2.12.13", "2.13.4"),
 
   // More version specific compiler options
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -139,24 +140,63 @@ lazy val sharedSettings = Seq(
       id="ericpeters",
       name="Eric Peters",
       email="eric@peters.org",
-      url=url("https://github.com/er1c")
+      url=url("https://er1c.github.io")
     )),
 
   // -- Settings meant for deployment on oss.sonatype.org
   sonatypeProfileName := organization.value,
-) ++
-  filterOutMultipleDependenciesFromGeneratedPomXml(
-    "groupId" -> "org.scoverage".r :: Nil,
-    "groupId" -> "org.typelevel".r :: "artifactId" -> "simulacrum".r :: Nil,
+)
+
+/**
+  * Shared configuration across all sub-projects with actual code to be published.
+  */
+def defaultCrossProjectConfiguration(pr: CrossProject) = {
+  val sharedJavascriptSettings = Seq(
+    coverageExcludedFiles := ".*",
+    // Use globally accessible (rather than local) source paths in JS source maps
+    scalacOptions += {
+      val tagOrHash = {
+        val ver = s"v${version.value}"
+        if (isSnapshot.value)
+          git.gitHeadCommit.value.getOrElse(ver)
+        else
+          ver
+      }
+      val l = (baseDirectory in LocalRootProject).value.toURI.toString
+      val g = s"https://raw.githubusercontent.com/${githubFullRepositoryID.value}/$tagOrHash/"
+      s"-P:scalajs:mapSourceURI:$l->$g"
+    },
+    // Needed in order to publish for multiple Scala.js versions:
+    // https://github.com/olafurpg/sbt-ci-release#how-do-i-publish-cross-built-scalajs-projects
+    skip.in(publish) := customScalaJSVersion.isEmpty,
   )
+
+  val sharedJVMSettings = Seq(
+    // Needed in order to publish for multiple Scala.js versions:
+    // https://github.com/olafurpg/sbt-ci-release#how-do-i-publish-cross-built-scalajs-projects
+    skip.in(publish) := customScalaJSVersion.isDefined,
+  )
+
+  pr.configure(defaultPlugins)
+    .settings(sharedSettings)
+    .jsSettings(sharedJavascriptSettings)
+    .jvmSettings(doctestTestSettings(DoctestTestFramework.ScalaTest))
+    .jvmSettings(sharedJVMSettings)
+    .settings(crossVersionSharedSources)
+    .settings(filterOutMultipleDependenciesFromGeneratedPomXml(
+      "groupId" -> "org.scoverage".r :: Nil,
+      "groupId" -> "org.typelevel".r :: "artifactId" -> "simulacrum".r :: Nil,
+    ))
+}
 
 lazy val root = project.in(file("."))
   .enablePlugins(ScalaUnidocPlugin)
-  .aggregate(client, examples)
+  .enablePlugins(CodegenPlugin)
+  .aggregate(clientJVM, clientJS)
   .configure(defaultPlugins)
   .settings(sharedSettings)
   .settings(doNotPublishArtifact)
-  .settings(unidocSettings)
+  .settings(unidocSettings(clientJVM))
   .settings(
     // Try really hard to not execute tasks in parallel ffs
     Global / concurrentRestrictions := Tags.limitAll(1) :: Nil,
@@ -168,12 +208,12 @@ lazy val site = project.in(file("site"))
   .enablePlugins(MdocPlugin)
   .settings(sharedSettings)
   .settings(doNotPublishArtifact)
-  .dependsOn(client)
+  .dependsOn(clientJVM)
   .settings {
     import microsites._
     Seq(
       micrositeName := projectTitle.value,
-      micrositeDescription := "Scala GitHub API GraphQL Library",
+      micrositeDescription := "Caliban GitHub GraphQL API Client",
       micrositeAuthor := "Eric Peters",
       micrositeTwitterCreator := "@ericpeters",
       micrositeGithubOwner := githubOwnerID.value,
@@ -194,12 +234,9 @@ lazy val site = project.in(file("site"))
         "gray-lighter" -> "#F4F3F4",
         "white-color" -> "#FFFFFF"
       ),
-      micrositeCompilingDocsTool := WithMdoc,
       fork in mdoc := true,
-      scalacOptions.in(Tut) ~= filterConsoleScalacOptions,
-      libraryDependencies += "com.47deg" %% "github4s" % GitHub4sVersion,
-      micrositePushSiteWith := GitHub4s,
-      micrositeGithubToken := sys.env.get("GITHUB_TOKEN"),
+      micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
+      micrositePushSiteWith := micrositeGithubToken.value.map(_ => GitHub4s).getOrElse(GHPagesPlugin),
       micrositeExtraMdFilesOutput := (resourceManaged in Compile).value / "jekyll",
       micrositeConfigYaml := ConfigYml(
         yamlPath = Some((resourceDirectory in Compile).value / "microsite" / "_config.yml")
@@ -231,37 +268,34 @@ lazy val site = project.in(file("site"))
     )
   }
 
-lazy val client = project
-  .configure(defaultPlugins)
-  .settings(sharedSettings)
-  .disablePlugins(ScalafmtPlugin)
-  .enablePlugins(CodegenPlugin)
+lazy val client = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("client"))
+  .configureCross(defaultCrossProjectConfiguration)
   .settings(
-    name       := projectTitle.value,
-    moduleName := "caliban-github-api-client",
+    name := "caliban-github-api-client",
     libraryDependencies ++= Seq(
+      "com.github.ghostdogpr" %%% "caliban-client" % CalibanVersion,
       // For testing
-      "org.scalatest"         %%% "scalatest"        % ScalaTestVersion % Test,
-      "org.scalatestplus"     %%% "scalacheck-1-14"  % ScalaTestPlusVersion % Test,
-      "org.scalacheck"        %%% "scalacheck"       % ScalaCheckVersion % Test,
-      "com.github.ghostdogpr" %% "caliban-client" % CalibanVersion
+      "org.scalatest"     %%% "scalatest"        % ScalaTestVersion % Test,
     ),
-    // https://docs.github.com/public/schema.docs.graphql
-    // calibanGenClient src/main/resources/schema.docs.graphql src/main/scala/graphql/GithubApi.scala
   )
 
-lazy val examples = project
-  .in(file("examples"))
-  .configure(defaultPlugins)
-  .settings(sharedSettings)
-  .settings(doNotPublishArtifact)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.1.3",
-      "com.github.ghostdogpr" %% "caliban-http4s" % CalibanVersion,
-    )
-  )
-  .dependsOn(client)
+lazy val clientJVM = client.jvm
+lazy val clientJS  = client.js
+
+ lazy val examples = project
+   .in(file("examples"))
+   .configure(defaultPlugins)
+   .settings(sharedSettings)
+   .settings(doNotPublishArtifact)
+   .settings(
+     libraryDependencies ++= Seq(
+       "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.1.3",
+       "com.github.ghostdogpr" %% "caliban-http4s" % CalibanVersion,
+     )
+   )
+   .dependsOn(clientJVM)
 
 // Reloads build.sbt changes whenever detected
 Global / onChangedBuildSource := ReloadOnSourceChanges
