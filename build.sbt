@@ -18,6 +18,9 @@ addCommandAlias("ci-doc",     ";unidoc ;site/makeMicrosite")
 addCommandAlias("ci",         ";project root ;reload ;+scalafmtCheckAll ;+ci-jvm ;+ci-js ;+package ;ci-doc")
 addCommandAlias("release",    ";+clean ;ci-release ;unidoc ;site/publishMicrosite")
 
+
+// curl -H "Accept: application/vnd.github.package-deletes-preview+json" -o "project/schema.graphql" https://docs.github.com/public/schema.docs.graphql
+
 lazy val genCmd: String =
   "calibanGenClient project/schema.graphql client/src/main/scala/Client.scala --packageName caliban.client.github"
 

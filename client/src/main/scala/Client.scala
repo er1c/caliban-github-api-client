@@ -32,6 +32,8 @@ object Client {
 
   type GitObjectID = String
 
+  type GitRefname = String
+
   type GitSSHRemote = String
 
   type GitTimestamp = String
@@ -416,6 +418,7 @@ object Client {
     case object PENDING extends DeploymentStatusState
     case object QUEUED extends DeploymentStatusState
     case object SUCCESS extends DeploymentStatusState
+    case object WAITING extends DeploymentStatusState
 
     implicit val decoder: ScalarDecoder[DeploymentStatusState] = {
       case __StringValue("ERROR") => Right(DeploymentStatusState.ERROR)
@@ -425,6 +428,7 @@ object Client {
       case __StringValue("PENDING") => Right(DeploymentStatusState.PENDING)
       case __StringValue("QUEUED") => Right(DeploymentStatusState.QUEUED)
       case __StringValue("SUCCESS") => Right(DeploymentStatusState.SUCCESS)
+      case __StringValue("WAITING") => Right(DeploymentStatusState.WAITING)
       case other => Left(DecodingError(s"Can't build DeploymentStatusState from input $other"))
     }
     implicit val encoder: ArgEncoder[DeploymentStatusState] = new ArgEncoder[DeploymentStatusState] {
@@ -437,6 +441,7 @@ object Client {
           case DeploymentStatusState.PENDING => __EnumValue("PENDING")
           case DeploymentStatusState.QUEUED => __EnumValue("QUEUED")
           case DeploymentStatusState.SUCCESS => __EnumValue("SUCCESS")
+          case DeploymentStatusState.WAITING => __EnumValue("WAITING")
         }
       override def typeName: String = "DeploymentStatusState"
     }
@@ -1265,6 +1270,44 @@ object Client {
     }
   }
 
+  sealed trait MergeStateStatus extends scala.Product with scala.Serializable
+  object MergeStateStatus {
+    case object BEHIND extends MergeStateStatus
+    case object BLOCKED extends MergeStateStatus
+    case object CLEAN extends MergeStateStatus
+    case object DIRTY extends MergeStateStatus
+    case object DRAFT extends MergeStateStatus
+    case object HAS_HOOKS extends MergeStateStatus
+    case object UNKNOWN extends MergeStateStatus
+    case object UNSTABLE extends MergeStateStatus
+
+    implicit val decoder: ScalarDecoder[MergeStateStatus] = {
+      case __StringValue("BEHIND") => Right(MergeStateStatus.BEHIND)
+      case __StringValue("BLOCKED") => Right(MergeStateStatus.BLOCKED)
+      case __StringValue("CLEAN") => Right(MergeStateStatus.CLEAN)
+      case __StringValue("DIRTY") => Right(MergeStateStatus.DIRTY)
+      case __StringValue("DRAFT") => Right(MergeStateStatus.DRAFT)
+      case __StringValue("HAS_HOOKS") => Right(MergeStateStatus.HAS_HOOKS)
+      case __StringValue("UNKNOWN") => Right(MergeStateStatus.UNKNOWN)
+      case __StringValue("UNSTABLE") => Right(MergeStateStatus.UNSTABLE)
+      case other => Left(DecodingError(s"Can't build MergeStateStatus from input $other"))
+    }
+    implicit val encoder: ArgEncoder[MergeStateStatus] = new ArgEncoder[MergeStateStatus] {
+      override def encode(value: MergeStateStatus): __Value =
+        value match {
+          case MergeStateStatus.BEHIND => __EnumValue("BEHIND")
+          case MergeStateStatus.BLOCKED => __EnumValue("BLOCKED")
+          case MergeStateStatus.CLEAN => __EnumValue("CLEAN")
+          case MergeStateStatus.DIRTY => __EnumValue("DIRTY")
+          case MergeStateStatus.DRAFT => __EnumValue("DRAFT")
+          case MergeStateStatus.HAS_HOOKS => __EnumValue("HAS_HOOKS")
+          case MergeStateStatus.UNKNOWN => __EnumValue("UNKNOWN")
+          case MergeStateStatus.UNSTABLE => __EnumValue("UNSTABLE")
+        }
+      override def typeName: String = "MergeStateStatus"
+    }
+  }
+
   sealed trait MergeableState extends scala.Product with scala.Serializable
   object MergeableState {
     case object CONFLICTING extends MergeableState
@@ -1332,6 +1375,27 @@ object Client {
         }
       override def typeName: String = "MilestoneState"
     }
+  }
+
+  sealed trait NotificationRestrictionSettingValue extends scala.Product with scala.Serializable
+  object NotificationRestrictionSettingValue {
+    case object DISABLED extends NotificationRestrictionSettingValue
+    case object ENABLED extends NotificationRestrictionSettingValue
+
+    implicit val decoder: ScalarDecoder[NotificationRestrictionSettingValue] = {
+      case __StringValue("DISABLED") => Right(NotificationRestrictionSettingValue.DISABLED)
+      case __StringValue("ENABLED") => Right(NotificationRestrictionSettingValue.ENABLED)
+      case other => Left(DecodingError(s"Can't build NotificationRestrictionSettingValue from input $other"))
+    }
+    implicit val encoder: ArgEncoder[NotificationRestrictionSettingValue] =
+      new ArgEncoder[NotificationRestrictionSettingValue] {
+        override def encode(value: NotificationRestrictionSettingValue): __Value =
+          value match {
+            case NotificationRestrictionSettingValue.DISABLED => __EnumValue("DISABLED")
+            case NotificationRestrictionSettingValue.ENABLED => __EnumValue("ENABLED")
+          }
+        override def typeName: String = "NotificationRestrictionSettingValue"
+      }
   }
 
   sealed trait OauthApplicationCreateAuditEntryState extends scala.Product with scala.Serializable
@@ -3282,6 +3346,43 @@ object Client {
       }
   }
 
+  sealed trait SponsorableOrderField extends scala.Product with scala.Serializable
+  object SponsorableOrderField {
+    case object LOGIN extends SponsorableOrderField
+
+    implicit val decoder: ScalarDecoder[SponsorableOrderField] = {
+      case __StringValue("LOGIN") => Right(SponsorableOrderField.LOGIN)
+      case other => Left(DecodingError(s"Can't build SponsorableOrderField from input $other"))
+    }
+    implicit val encoder: ArgEncoder[SponsorableOrderField] = new ArgEncoder[SponsorableOrderField] {
+      override def encode(value: SponsorableOrderField): __Value =
+        value match {
+          case SponsorableOrderField.LOGIN => __EnumValue("LOGIN")
+        }
+      override def typeName: String = "SponsorableOrderField"
+    }
+  }
+
+  sealed trait SponsorsGoalKind extends scala.Product with scala.Serializable
+  object SponsorsGoalKind {
+    case object MONTHLY_SPONSORSHIP_AMOUNT extends SponsorsGoalKind
+    case object TOTAL_SPONSORS_COUNT extends SponsorsGoalKind
+
+    implicit val decoder: ScalarDecoder[SponsorsGoalKind] = {
+      case __StringValue("MONTHLY_SPONSORSHIP_AMOUNT") => Right(SponsorsGoalKind.MONTHLY_SPONSORSHIP_AMOUNT)
+      case __StringValue("TOTAL_SPONSORS_COUNT") => Right(SponsorsGoalKind.TOTAL_SPONSORS_COUNT)
+      case other => Left(DecodingError(s"Can't build SponsorsGoalKind from input $other"))
+    }
+    implicit val encoder: ArgEncoder[SponsorsGoalKind] = new ArgEncoder[SponsorsGoalKind] {
+      override def encode(value: SponsorsGoalKind): __Value =
+        value match {
+          case SponsorsGoalKind.MONTHLY_SPONSORSHIP_AMOUNT => __EnumValue("MONTHLY_SPONSORSHIP_AMOUNT")
+          case SponsorsGoalKind.TOTAL_SPONSORS_COUNT => __EnumValue("TOTAL_SPONSORS_COUNT")
+        }
+      override def typeName: String = "SponsorsGoalKind"
+    }
+  }
+
   sealed trait SponsorsTierOrderField extends scala.Product with scala.Serializable
   object SponsorsTierOrderField {
     case object CREATED_AT extends SponsorsTierOrderField
@@ -3575,6 +3676,26 @@ object Client {
     }
   }
 
+  sealed trait TeamReviewAssignmentAlgorithm extends scala.Product with scala.Serializable
+  object TeamReviewAssignmentAlgorithm {
+    case object LOAD_BALANCE extends TeamReviewAssignmentAlgorithm
+    case object ROUND_ROBIN extends TeamReviewAssignmentAlgorithm
+
+    implicit val decoder: ScalarDecoder[TeamReviewAssignmentAlgorithm] = {
+      case __StringValue("LOAD_BALANCE") => Right(TeamReviewAssignmentAlgorithm.LOAD_BALANCE)
+      case __StringValue("ROUND_ROBIN") => Right(TeamReviewAssignmentAlgorithm.ROUND_ROBIN)
+      case other => Left(DecodingError(s"Can't build TeamReviewAssignmentAlgorithm from input $other"))
+    }
+    implicit val encoder: ArgEncoder[TeamReviewAssignmentAlgorithm] = new ArgEncoder[TeamReviewAssignmentAlgorithm] {
+      override def encode(value: TeamReviewAssignmentAlgorithm): __Value =
+        value match {
+          case TeamReviewAssignmentAlgorithm.LOAD_BALANCE => __EnumValue("LOAD_BALANCE")
+          case TeamReviewAssignmentAlgorithm.ROUND_ROBIN => __EnumValue("ROUND_ROBIN")
+        }
+      override def typeName: String = "TeamReviewAssignmentAlgorithm"
+    }
+  }
+
   sealed trait TeamRole extends scala.Product with scala.Serializable
   object TeamRole {
     case object ADMIN extends TeamRole
@@ -3669,15 +3790,18 @@ object Client {
 
   sealed trait VerifiableDomainOrderField extends scala.Product with scala.Serializable
   object VerifiableDomainOrderField {
+    case object CREATED_AT extends VerifiableDomainOrderField
     case object DOMAIN extends VerifiableDomainOrderField
 
     implicit val decoder: ScalarDecoder[VerifiableDomainOrderField] = {
+      case __StringValue("CREATED_AT") => Right(VerifiableDomainOrderField.CREATED_AT)
       case __StringValue("DOMAIN") => Right(VerifiableDomainOrderField.DOMAIN)
       case other => Left(DecodingError(s"Can't build VerifiableDomainOrderField from input $other"))
     }
     implicit val encoder: ArgEncoder[VerifiableDomainOrderField] = new ArgEncoder[VerifiableDomainOrderField] {
       override def encode(value: VerifiableDomainOrderField): __Value =
         value match {
+          case VerifiableDomainOrderField.CREATED_AT => __EnumValue("CREATED_AT")
           case VerifiableDomainOrderField.DOMAIN => __EnumValue("DOMAIN")
         }
       override def typeName: String = "VerifiableDomainOrderField"
@@ -3805,6 +3929,7 @@ object Client {
       onBaseRefDeletedEvent: Option[SelectionBuilder[BaseRefDeletedEvent, A]] = None,
       onAutoMergeEnabledEvent: Option[SelectionBuilder[AutoMergeEnabledEvent, A]] = None,
       onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onCWE: Option[SelectionBuilder[CWE, A]] = None,
       onOauthApplicationCreateAuditEntry: Option[SelectionBuilder[OauthApplicationCreateAuditEntry, A]] = None,
       onSponsorsListing: Option[SelectionBuilder[SponsorsListing, A]] = None,
       onOrgConfigDisableCollaboratorsOnlyAuditEntry: Option[
@@ -3851,6 +3976,7 @@ object Client {
       onPackageTag: Option[SelectionBuilder[PackageTag, A]] = None,
       onRepoConfigEnableAnonymousGitAccessAuditEntry: Option[
         SelectionBuilder[RepoConfigEnableAnonymousGitAccessAuditEntry, A]] = None,
+      onPinnedIssue: Option[SelectionBuilder[PinnedIssue, A]] = None,
       onOrgUpdateMemberRepositoryCreationPermissionAuditEntry: Option[
         SelectionBuilder[OrgUpdateMemberRepositoryCreationPermissionAuditEntry, A]] = None,
       onTransferredEvent: Option[SelectionBuilder[TransferredEvent, A]] = None,
@@ -3942,6 +4068,7 @@ object Client {
       onUser: Option[SelectionBuilder[User, A]] = None,
       onTeamAddMemberAuditEntry: Option[SelectionBuilder[TeamAddMemberAuditEntry, A]] = None,
       onDeploymentEnvironmentChangedEvent: Option[SelectionBuilder[DeploymentEnvironmentChangedEvent, A]] = None,
+      onDependencyGraphManifest: Option[SelectionBuilder[DependencyGraphManifest, A]] = None,
       onMembersCanDeleteReposClearAuditEntry: Option[SelectionBuilder[MembersCanDeleteReposClearAuditEntry, A]] = None,
       onEnterpriseServerUserAccountsUpload: Option[SelectionBuilder[EnterpriseServerUserAccountsUpload, A]] = None,
       onAutoMergeDisabledEvent: Option[SelectionBuilder[AutoMergeDisabledEvent, A]] = None,
@@ -4023,6 +4150,7 @@ object Client {
             "BaseRefDeletedEvent" -> onBaseRefDeletedEvent,
             "AutoMergeEnabledEvent" -> onAutoMergeEnabledEvent,
             "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+            "CWE" -> onCWE,
             "OauthApplicationCreateAuditEntry" -> onOauthApplicationCreateAuditEntry,
             "SponsorsListing" -> onSponsorsListing,
             "OrgConfigDisableCollaboratorsOnlyAuditEntry" -> onOrgConfigDisableCollaboratorsOnlyAuditEntry,
@@ -4065,6 +4193,7 @@ object Client {
             "ProjectColumn" -> onProjectColumn,
             "PackageTag" -> onPackageTag,
             "RepoConfigEnableAnonymousGitAccessAuditEntry" -> onRepoConfigEnableAnonymousGitAccessAuditEntry,
+            "PinnedIssue" -> onPinnedIssue,
             "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" -> onOrgUpdateMemberRepositoryCreationPermissionAuditEntry,
             "TransferredEvent" -> onTransferredEvent,
             "RepositoryTopic" -> onRepositoryTopic,
@@ -4144,6 +4273,7 @@ object Client {
             "User" -> onUser,
             "TeamAddMemberAuditEntry" -> onTeamAddMemberAuditEntry,
             "DeploymentEnvironmentChangedEvent" -> onDeploymentEnvironmentChangedEvent,
+            "DependencyGraphManifest" -> onDependencyGraphManifest,
             "MembersCanDeleteReposClearAuditEntry" -> onMembersCanDeleteReposClearAuditEntry,
             "EnterpriseServerUserAccountsUpload" -> onEnterpriseServerUserAccountsUpload,
             "AutoMergeDisabledEvent" -> onAutoMergeDisabledEvent,
@@ -4439,6 +4569,21 @@ object Client {
       */
     def databaseId: SelectionBuilder[AddedToProjectEvent, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
     def id: SelectionBuilder[AddedToProjectEvent, String] = Field("id", Scalar())
+    /**
+      * Project referenced by event.
+      */
+    def project[A](innerSelection: SelectionBuilder[Project, A]): SelectionBuilder[AddedToProjectEvent, Option[A]] =
+      Field("project", OptionOf(Obj(innerSelection)))
+    /**
+      * Project card referenced by this project event.
+      */
+    def projectCard[A](
+      innerSelection: SelectionBuilder[ProjectCard, A]): SelectionBuilder[AddedToProjectEvent, Option[A]] =
+      Field("projectCard", OptionOf(Obj(innerSelection)))
+    /**
+      * Column name referenced by this project event.
+      */
+    def projectColumnName: SelectionBuilder[AddedToProjectEvent, String] = Field("projectColumnName", Scalar())
   }
 
   type App
@@ -4481,6 +4626,20 @@ object Client {
       * The URL to the app's homepage.
       */
     def url: SelectionBuilder[App, URI] = Field("url", Scalar())
+  }
+
+  type ApproveVerifiableDomainPayload
+  object ApproveVerifiableDomainPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[ApproveVerifiableDomainPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The verifiable domain that was approved.
+      */
+    def domain[A](innerSelection: SelectionBuilder[VerifiableDomain, A])
+      : SelectionBuilder[ApproveVerifiableDomainPayload, Option[A]] = Field("domain", OptionOf(Obj(innerSelection)))
   }
 
   type ArchiveRepositoryPayload
@@ -4647,6 +4806,55 @@ object Client {
     def pullRequest[A](
       innerSelection: SelectionBuilder[PullRequest, A]): SelectionBuilder[AutoMergeEnabledEvent, Option[A]] =
       Field("pullRequest", OptionOf(Obj(innerSelection)))
+  }
+
+  type AutoMergeRequest
+  object AutoMergeRequest {
+    /**
+      * The email address of the author of this auto-merge request.
+      */
+    def authorEmail: SelectionBuilder[AutoMergeRequest, Option[String]] = Field("authorEmail", OptionOf(Scalar()))
+    /**
+      * The commit message of the auto-merge request.
+      */
+    def commitBody: SelectionBuilder[AutoMergeRequest, Option[String]] = Field("commitBody", OptionOf(Scalar()))
+    /**
+      * The commit title of the auto-merge request.
+      */
+    def commitHeadline: SelectionBuilder[AutoMergeRequest, Option[String]] = Field("commitHeadline", OptionOf(Scalar()))
+    /**
+      * When was this auto-merge request was enabled.
+      */
+    def enabledAt: SelectionBuilder[AutoMergeRequest, Option[DateTime]] = Field("enabledAt", OptionOf(Scalar()))
+    /**
+      * The actor who created the auto-merge request.
+      */
+    def enabledBy[A](
+      onBot: Option[SelectionBuilder[Bot, A]] = None,
+      onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onMannequin: Option[SelectionBuilder[Mannequin, A]] = None,
+      onUser: Option[SelectionBuilder[User, A]] = None,
+      onOrganization: Option[SelectionBuilder[Organization, A]] = None): SelectionBuilder[AutoMergeRequest, Option[A]] =
+      Field(
+        "enabledBy",
+        OptionOf(
+          ChoiceOf(
+            Map(
+              "Bot" -> onBot,
+              "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+              "Mannequin" -> onMannequin,
+              "User" -> onUser,
+              "Organization" -> onOrganization).collect { case (k, Some(v)) => k -> Obj(v) }))
+      )
+    /**
+      * The merge method of the auto-merge request.
+      */
+    def mergeMethod: SelectionBuilder[AutoMergeRequest, PullRequestMergeMethod] = Field("mergeMethod", Scalar())
+    /**
+      * The pull request that this auto-merge request is set against.
+      */
+    def pullRequest[A](innerSelection: SelectionBuilder[PullRequest, A]): SelectionBuilder[AutoMergeRequest, A] =
+      Field("pullRequest", Obj(innerSelection))
   }
 
   type AutoRebaseEnabledEvent
@@ -5335,6 +5543,75 @@ range's change.
       : SelectionBuilder[BranchProtectionRuleEdge, Option[A]] = Field("node", OptionOf(Obj(innerSelection)))
   }
 
+  type CVSS
+  object CVSS {
+    /**
+      * The CVSS score associated with this advisory
+      */
+    def score: SelectionBuilder[CVSS, Double] = Field("score", Scalar())
+    /**
+      * The CVSS vector string associated with this advisory
+      */
+    def vectorString: SelectionBuilder[CVSS, Option[String]] = Field("vectorString", OptionOf(Scalar()))
+  }
+
+  type CWE
+  object CWE {
+    /**
+      * The id of the CWE
+      */
+    def cweId: SelectionBuilder[CWE, String] = Field("cweId", Scalar())
+    /**
+      * A detailed description of this CWE
+      */
+    def description: SelectionBuilder[CWE, String] = Field("description", Scalar())
+    /**
+      * ID of the object.
+      */
+    def id: SelectionBuilder[CWE, String] = Field("id", Scalar())
+    /**
+      * The name of this CWE
+      */
+    def name: SelectionBuilder[CWE, String] = Field("name", Scalar())
+  }
+
+  type CWEConnection
+  object CWEConnection {
+    /**
+      * A list of edges.
+      */
+    def edges[A](
+      innerSelection: SelectionBuilder[CWEEdge, A]): SelectionBuilder[CWEConnection, Option[List[Option[A]]]] =
+      Field("edges", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * A list of nodes.
+      */
+    def nodes[A](innerSelection: SelectionBuilder[CWE, A]): SelectionBuilder[CWEConnection, Option[List[Option[A]]]] =
+      Field("nodes", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * Information to aid in pagination.
+      */
+    def pageInfo[A](innerSelection: SelectionBuilder[PageInfo, A]): SelectionBuilder[CWEConnection, A] =
+      Field("pageInfo", Obj(innerSelection))
+    /**
+      * Identifies the total count of items in the connection.
+      */
+    def totalCount: SelectionBuilder[CWEConnection, Int] = Field("totalCount", Scalar())
+  }
+
+  type CWEEdge
+  object CWEEdge {
+    /**
+      * A cursor for use in pagination.
+      */
+    def cursor: SelectionBuilder[CWEEdge, String] = Field("cursor", Scalar())
+    /**
+      * The item at the end of the edge.
+      */
+    def node[A](innerSelection: SelectionBuilder[CWE, A]): SelectionBuilder[CWEEdge, Option[A]] =
+      Field("node", OptionOf(Obj(innerSelection)))
+  }
+
   type CancelEnterpriseAdminInvitationPayload
   object CancelEnterpriseAdminInvitationPayload {
     /**
@@ -5517,6 +5794,16 @@ range's change.
       */
     def externalId: SelectionBuilder[CheckRun, Option[String]] = Field("externalId", OptionOf(Scalar()))
     def id: SelectionBuilder[CheckRun, String] = Field("id", Scalar())
+    /**
+      * Whether this is required to pass before merging for a specific pull request.
+      */
+    def isRequired(
+      pullRequestId: Option[String] = None,
+      pullRequestNumber: Option[Int] = None): SelectionBuilder[CheckRun, Boolean] =
+      Field(
+        "isRequired",
+        Scalar(),
+        arguments = List(Argument("pullRequestId", pullRequestId), Argument("pullRequestNumber", pullRequestNumber)))
     /**
       * The name of the check for this check run.
       */
@@ -5978,7 +6265,9 @@ range's change.
       */
     def additions: SelectionBuilder[Commit, Int] = Field("additions", Scalar())
     /**
-      * The pull requests associated with a commit
+      * The merged Pull Request that introduced the commit to the repository. If the
+commit is not present in the default branch, additionally returns open Pull
+Requests associated with the commit
       */
     def associatedPullRequests[A](
       after: Option[String] = None,
@@ -6698,6 +6987,42 @@ Note: For private repositories, these links are temporary and expire after five 
       Field("subject", ChoiceOf(Map("Issue" -> Obj(onIssue), "PullRequest" -> Obj(onPullRequest))))
   }
 
+  type ContentAttachment
+  object ContentAttachment {
+    /**
+      * The body text of the content attachment. This parameter supports markdown.
+      */
+    def body: SelectionBuilder[ContentAttachment, String] = Field("body", Scalar())
+    /**
+      * The content reference that the content attachment is attached to.
+      */
+    def contentReference[A](
+      innerSelection: SelectionBuilder[ContentReference, A]): SelectionBuilder[ContentAttachment, A] =
+      Field("contentReference", Obj(innerSelection))
+    /**
+      * Identifies the primary key from the database.
+      */
+    def databaseId: SelectionBuilder[ContentAttachment, Int] = Field("databaseId", Scalar())
+    def id: SelectionBuilder[ContentAttachment, String] = Field("id", Scalar())
+    /**
+      * The title of the content attachment.
+      */
+    def title: SelectionBuilder[ContentAttachment, String] = Field("title", Scalar())
+  }
+
+  type ContentReference
+  object ContentReference {
+    /**
+      * Identifies the primary key from the database.
+      */
+    def databaseId: SelectionBuilder[ContentReference, Int] = Field("databaseId", Scalar())
+    def id: SelectionBuilder[ContentReference, String] = Field("id", Scalar())
+    /**
+      * The reference of the content reference.
+      */
+    def reference: SelectionBuilder[ContentReference, String] = Field("reference", Scalar())
+  }
+
   type ContributionCalendar
   object ContributionCalendar {
     /**
@@ -7176,6 +7501,21 @@ non-zero when the user has chosen to share their private contribution counts.
       Field("projectCard", OptionOf(Obj(innerSelection)))
   }
 
+  type ConvertPullRequestToDraftPayload
+  object ConvertPullRequestToDraftPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[ConvertPullRequestToDraftPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The pull request that is now a draft.
+      */
+    def pullRequest[A](
+      innerSelection: SelectionBuilder[PullRequest, A]): SelectionBuilder[ConvertPullRequestToDraftPayload, Option[A]] =
+      Field("pullRequest", OptionOf(Obj(innerSelection)))
+  }
+
   type ConvertToDraftEvent
   object ConvertToDraftEvent {
     /**
@@ -7251,6 +7591,22 @@ non-zero when the user has chosen to share their private contribution counts.
       */
     def databaseId: SelectionBuilder[ConvertedNoteToIssueEvent, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
     def id: SelectionBuilder[ConvertedNoteToIssueEvent, String] = Field("id", Scalar())
+    /**
+      * Project referenced by event.
+      */
+    def project[A](
+      innerSelection: SelectionBuilder[Project, A]): SelectionBuilder[ConvertedNoteToIssueEvent, Option[A]] =
+      Field("project", OptionOf(Obj(innerSelection)))
+    /**
+      * Project card referenced by this project event.
+      */
+    def projectCard[A](
+      innerSelection: SelectionBuilder[ProjectCard, A]): SelectionBuilder[ConvertedNoteToIssueEvent, Option[A]] =
+      Field("projectCard", OptionOf(Obj(innerSelection)))
+    /**
+      * Column name referenced by this project event.
+      */
+    def projectColumnName: SelectionBuilder[ConvertedNoteToIssueEvent, String] = Field("projectColumnName", Scalar())
   }
 
   type CreateBranchProtectionRulePayload
@@ -7295,6 +7651,55 @@ non-zero when the user has chosen to share their private contribution counts.
       */
     def clientMutationId: SelectionBuilder[CreateCheckSuitePayload, Option[String]] =
       Field("clientMutationId", OptionOf(Scalar()))
+  }
+
+  type CreateContentAttachmentPayload
+  object CreateContentAttachmentPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[CreateContentAttachmentPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The newly created content attachment.
+      */
+    def contentAttachment[A](innerSelection: SelectionBuilder[ContentAttachment, A])
+      : SelectionBuilder[CreateContentAttachmentPayload, Option[A]] =
+      Field("contentAttachment", OptionOf(Obj(innerSelection)))
+  }
+
+  type CreateDeploymentPayload
+  object CreateDeploymentPayload {
+    /**
+      * True if the default branch has been auto-merged into the deployment ref.
+      */
+    def autoMerged: SelectionBuilder[CreateDeploymentPayload, Option[Boolean]] = Field("autoMerged", OptionOf(Scalar()))
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[CreateDeploymentPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The new deployment.
+      */
+    def deployment[A](
+      innerSelection: SelectionBuilder[Deployment, A]): SelectionBuilder[CreateDeploymentPayload, Option[A]] =
+      Field("deployment", OptionOf(Obj(innerSelection)))
+  }
+
+  type CreateDeploymentStatusPayload
+  object CreateDeploymentStatusPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[CreateDeploymentStatusPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The new deployment status.
+      */
+    def deploymentStatus[A](innerSelection: SelectionBuilder[DeploymentStatus, A])
+      : SelectionBuilder[CreateDeploymentStatusPayload, Option[A]] =
+      Field("deploymentStatus", OptionOf(Obj(innerSelection)))
   }
 
   type CreateEnterpriseOrganizationPayload
@@ -7345,6 +7750,20 @@ non-zero when the user has chosen to share their private contribution counts.
       */
     def issue[A](innerSelection: SelectionBuilder[Issue, A]): SelectionBuilder[CreateIssuePayload, Option[A]] =
       Field("issue", OptionOf(Obj(innerSelection)))
+  }
+
+  type CreateLabelPayload
+  object CreateLabelPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[CreateLabelPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The new label.
+      */
+    def label[A](innerSelection: SelectionBuilder[Label, A]): SelectionBuilder[CreateLabelPayload, Option[A]] =
+      Field("label", OptionOf(Obj(innerSelection)))
   }
 
   type CreateProjectPayload
@@ -7945,6 +8364,28 @@ longer access.
       Field("repository", OptionOf(Obj(innerSelection)))
   }
 
+  type DeleteLabelPayload
+  object DeleteLabelPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[DeleteLabelPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+  }
+
+  type DeletePackageVersionPayload
+  object DeletePackageVersionPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[DeletePackageVersionPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * Whether or not the operation succeeded.
+      */
+    def success: SelectionBuilder[DeletePackageVersionPayload, Option[Boolean]] = Field("success", OptionOf(Scalar()))
+  }
+
   type DeleteProjectCardPayload
   object DeleteProjectCardPayload {
     /**
@@ -8120,6 +8561,157 @@ longer access.
       onIssue: SelectionBuilder[Issue, A],
       onPullRequest: SelectionBuilder[PullRequest, A]): SelectionBuilder[DemilestonedEvent, A] =
       Field("subject", ChoiceOf(Map("Issue" -> Obj(onIssue), "PullRequest" -> Obj(onPullRequest))))
+  }
+
+  type DependencyGraphDependency
+  object DependencyGraphDependency {
+    /**
+      * Does the dependency itself have dependencies?
+      */
+    def hasDependencies: SelectionBuilder[DependencyGraphDependency, Boolean] = Field("hasDependencies", Scalar())
+    /**
+      * The dependency package manager
+      */
+    def packageManager: SelectionBuilder[DependencyGraphDependency, Option[String]] =
+      Field("packageManager", OptionOf(Scalar()))
+    /**
+      * The required package name
+      */
+    def packageName: SelectionBuilder[DependencyGraphDependency, String] = Field("packageName", Scalar())
+    /**
+      * The repository containing the package
+      */
+    def repository[A](
+      innerSelection: SelectionBuilder[Repository, A]): SelectionBuilder[DependencyGraphDependency, Option[A]] =
+      Field("repository", OptionOf(Obj(innerSelection)))
+    /**
+      * The dependency version requirements
+      */
+    def requirements: SelectionBuilder[DependencyGraphDependency, String] = Field("requirements", Scalar())
+  }
+
+  type DependencyGraphDependencyConnection
+  object DependencyGraphDependencyConnection {
+    /**
+      * A list of edges.
+      */
+    def edges[A](innerSelection: SelectionBuilder[DependencyGraphDependencyEdge, A])
+      : SelectionBuilder[DependencyGraphDependencyConnection, Option[List[Option[A]]]] =
+      Field("edges", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * A list of nodes.
+      */
+    def nodes[A](innerSelection: SelectionBuilder[DependencyGraphDependency, A])
+      : SelectionBuilder[DependencyGraphDependencyConnection, Option[List[Option[A]]]] =
+      Field("nodes", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * Information to aid in pagination.
+      */
+    def pageInfo[A](
+      innerSelection: SelectionBuilder[PageInfo, A]): SelectionBuilder[DependencyGraphDependencyConnection, A] =
+      Field("pageInfo", Obj(innerSelection))
+    /**
+      * Identifies the total count of items in the connection.
+      */
+    def totalCount: SelectionBuilder[DependencyGraphDependencyConnection, Int] = Field("totalCount", Scalar())
+  }
+
+  type DependencyGraphDependencyEdge
+  object DependencyGraphDependencyEdge {
+    /**
+      * A cursor for use in pagination.
+      */
+    def cursor: SelectionBuilder[DependencyGraphDependencyEdge, String] = Field("cursor", Scalar())
+    /**
+      * The item at the end of the edge.
+      */
+    def node[A](innerSelection: SelectionBuilder[DependencyGraphDependency, A])
+      : SelectionBuilder[DependencyGraphDependencyEdge, Option[A]] = Field("node", OptionOf(Obj(innerSelection)))
+  }
+
+  type DependencyGraphManifest
+  object DependencyGraphManifest {
+    /**
+      * Path to view the manifest file blob
+      */
+    def blobPath: SelectionBuilder[DependencyGraphManifest, String] = Field("blobPath", Scalar())
+    /**
+      * A list of manifest dependencies
+      */
+    def dependencies[A](
+      after: Option[String] = None,
+      before: Option[String] = None,
+      first: Option[Int] = None,
+      last: Option[Int] = None)(innerSelection: SelectionBuilder[DependencyGraphDependencyConnection, A])
+      : SelectionBuilder[DependencyGraphManifest, Option[A]] =
+      Field(
+        "dependencies",
+        OptionOf(Obj(innerSelection)),
+        arguments =
+          List(Argument("after", after), Argument("before", before), Argument("first", first), Argument("last", last))
+      )
+    /**
+      * The number of dependencies listed in the manifest
+      */
+    def dependenciesCount: SelectionBuilder[DependencyGraphManifest, Option[Int]] =
+      Field("dependenciesCount", OptionOf(Scalar()))
+    /**
+      * Is the manifest too big to parse?
+      */
+    def exceedsMaxSize: SelectionBuilder[DependencyGraphManifest, Boolean] = Field("exceedsMaxSize", Scalar())
+    /**
+      * Fully qualified manifest filename
+      */
+    def filename: SelectionBuilder[DependencyGraphManifest, String] = Field("filename", Scalar())
+    def id: SelectionBuilder[DependencyGraphManifest, String] = Field("id", Scalar())
+    /**
+      * Were we able to parse the manifest?
+      */
+    def parseable: SelectionBuilder[DependencyGraphManifest, Boolean] = Field("parseable", Scalar())
+    /**
+      * The repository containing the manifest
+      */
+    def repository[A](innerSelection: SelectionBuilder[Repository, A]): SelectionBuilder[DependencyGraphManifest, A] =
+      Field("repository", Obj(innerSelection))
+  }
+
+  type DependencyGraphManifestConnection
+  object DependencyGraphManifestConnection {
+    /**
+      * A list of edges.
+      */
+    def edges[A](innerSelection: SelectionBuilder[DependencyGraphManifestEdge, A])
+      : SelectionBuilder[DependencyGraphManifestConnection, Option[List[Option[A]]]] =
+      Field("edges", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * A list of nodes.
+      */
+    def nodes[A](innerSelection: SelectionBuilder[DependencyGraphManifest, A])
+      : SelectionBuilder[DependencyGraphManifestConnection, Option[List[Option[A]]]] =
+      Field("nodes", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * Information to aid in pagination.
+      */
+    def pageInfo[A](
+      innerSelection: SelectionBuilder[PageInfo, A]): SelectionBuilder[DependencyGraphManifestConnection, A] =
+      Field("pageInfo", Obj(innerSelection))
+    /**
+      * Identifies the total count of items in the connection.
+      */
+    def totalCount: SelectionBuilder[DependencyGraphManifestConnection, Int] = Field("totalCount", Scalar())
+  }
+
+  type DependencyGraphManifestEdge
+  object DependencyGraphManifestEdge {
+    /**
+      * A cursor for use in pagination.
+      */
+    def cursor: SelectionBuilder[DependencyGraphManifestEdge, String] = Field("cursor", Scalar())
+    /**
+      * The item at the end of the edge.
+      */
+    def node[A](innerSelection: SelectionBuilder[DependencyGraphManifest, A])
+      : SelectionBuilder[DependencyGraphManifestEdge, Option[A]] = Field("node", OptionOf(Obj(innerSelection)))
   }
 
   type DeployKey
@@ -8453,6 +9045,10 @@ longer access.
       */
     def description: SelectionBuilder[DeploymentStatus, Option[String]] = Field("description", OptionOf(Scalar()))
     /**
+      * Identifies the environment of the deployment at the time of this deployment status
+      */
+    def environment: SelectionBuilder[DeploymentStatus, Option[String]] = Field("environment", OptionOf(Scalar()))
+    /**
       * Identifies the environment URL of the deployment.
       */
     def environmentUrl: SelectionBuilder[DeploymentStatus, Option[URI]] = Field("environmentUrl", OptionOf(Scalar()))
@@ -8508,6 +9104,42 @@ longer access.
     def node[A](
       innerSelection: SelectionBuilder[DeploymentStatus, A]): SelectionBuilder[DeploymentStatusEdge, Option[A]] =
       Field("node", OptionOf(Obj(innerSelection)))
+  }
+
+  type DisablePullRequestAutoMergePayload
+  object DisablePullRequestAutoMergePayload {
+    /**
+      * Identifies the actor who performed the event.
+      */
+    def actor[A](
+      onBot: Option[SelectionBuilder[Bot, A]] = None,
+      onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onMannequin: Option[SelectionBuilder[Mannequin, A]] = None,
+      onUser: Option[SelectionBuilder[User, A]] = None,
+      onOrganization: Option[SelectionBuilder[Organization, A]] = None)
+      : SelectionBuilder[DisablePullRequestAutoMergePayload, Option[A]] =
+      Field(
+        "actor",
+        OptionOf(
+          ChoiceOf(
+            Map(
+              "Bot" -> onBot,
+              "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+              "Mannequin" -> onMannequin,
+              "User" -> onUser,
+              "Organization" -> onOrganization).collect { case (k, Some(v)) => k -> Obj(v) }))
+      )
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[DisablePullRequestAutoMergePayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The pull request auto merge was disabled on.
+      */
+    def pullRequest[A](innerSelection: SelectionBuilder[PullRequest, A])
+      : SelectionBuilder[DisablePullRequestAutoMergePayload, Option[A]] =
+      Field("pullRequest", OptionOf(Obj(innerSelection)))
   }
 
   type DisconnectedEvent
@@ -8571,6 +9203,42 @@ longer access.
     def pullRequestReview[A](innerSelection: SelectionBuilder[PullRequestReview, A])
       : SelectionBuilder[DismissPullRequestReviewPayload, Option[A]] =
       Field("pullRequestReview", OptionOf(Obj(innerSelection)))
+  }
+
+  type EnablePullRequestAutoMergePayload
+  object EnablePullRequestAutoMergePayload {
+    /**
+      * Identifies the actor who performed the event.
+      */
+    def actor[A](
+      onBot: Option[SelectionBuilder[Bot, A]] = None,
+      onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onMannequin: Option[SelectionBuilder[Mannequin, A]] = None,
+      onUser: Option[SelectionBuilder[User, A]] = None,
+      onOrganization: Option[SelectionBuilder[Organization, A]] = None)
+      : SelectionBuilder[EnablePullRequestAutoMergePayload, Option[A]] =
+      Field(
+        "actor",
+        OptionOf(
+          ChoiceOf(
+            Map(
+              "Bot" -> onBot,
+              "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+              "Mannequin" -> onMannequin,
+              "User" -> onUser,
+              "Organization" -> onOrganization).collect { case (k, Some(v)) => k -> Obj(v) }))
+      )
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[EnablePullRequestAutoMergePayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The pull request auto-merge was enabled on.
+      */
+    def pullRequest[A](innerSelection: SelectionBuilder[PullRequest, A])
+      : SelectionBuilder[EnablePullRequestAutoMergePayload, Option[A]] =
+      Field("pullRequest", OptionOf(Obj(innerSelection)))
   }
 
   type Enterprise
@@ -9501,6 +10169,12 @@ repository can change repository visibility.
           Argument("value", value))
       )
     /**
+      * Indicates if email notification delivery for this enterprise is restricted to verified or approved domains.
+      */
+    def notificationDeliveryRestrictionEnabledSetting
+      : SelectionBuilder[EnterpriseOwnerInfo, NotificationRestrictionSettingValue] =
+      Field("notificationDeliveryRestrictionEnabledSetting", Scalar())
+    /**
       * The setting value for whether organization projects are enabled for organizations in this enterprise.
       */
     def organizationProjectsSetting: SelectionBuilder[EnterpriseOwnerInfo, EnterpriseEnabledDisabledSettingValue] =
@@ -9897,7 +10571,7 @@ repository can change repository visibility.
   object EnterpriseRepositoryInfo {
     def id: SelectionBuilder[EnterpriseRepositoryInfo, String] = Field("id", Scalar())
     /**
-      * Identifies if the repository is private.
+      * Identifies if the repository is private or internal.
       */
     def isPrivate: SelectionBuilder[EnterpriseRepositoryInfo, Boolean] = Field("isPrivate", Scalar())
     /**
@@ -11291,6 +11965,20 @@ GitHub, otherwise represents reason why signature is considered invalid.
       )
   }
 
+  type ImportProjectPayload
+  object ImportProjectPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[ImportProjectPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The new Project!
+      */
+    def project[A](innerSelection: SelectionBuilder[Project, A]): SelectionBuilder[ImportProjectPayload, Option[A]] =
+      Field("project", OptionOf(Obj(innerSelection)))
+  }
+
   type InviteEnterpriseAdminPayload
   object InviteEnterpriseAdminPayload {
     /**
@@ -11513,6 +12201,10 @@ GitHub, otherwise represents reason why signature is considered invalid.
       * Check if this comment was edited and includes an edit with the creation data
       */
     def includesCreatedEdit: SelectionBuilder[Issue, Boolean] = Field("includesCreatedEdit", Scalar())
+    /**
+      * Indicates whether or not this issue is currently pinned to the repository issues list
+      */
+    def isPinned: SelectionBuilder[Issue, Option[Boolean]] = Field("isPinned", OptionOf(Scalar()))
     /**
       * Is this issue read by the viewer
       */
@@ -14020,6 +14712,27 @@ for all of the organizations the user owns.
       */
     def databaseId: SelectionBuilder[MovedColumnsInProjectEvent, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
     def id: SelectionBuilder[MovedColumnsInProjectEvent, String] = Field("id", Scalar())
+    /**
+      * Column name the issue or pull request was moved from.
+      */
+    def previousProjectColumnName: SelectionBuilder[MovedColumnsInProjectEvent, String] =
+      Field("previousProjectColumnName", Scalar())
+    /**
+      * Project referenced by event.
+      */
+    def project[A](
+      innerSelection: SelectionBuilder[Project, A]): SelectionBuilder[MovedColumnsInProjectEvent, Option[A]] =
+      Field("project", OptionOf(Obj(innerSelection)))
+    /**
+      * Project card referenced by this project event.
+      */
+    def projectCard[A](
+      innerSelection: SelectionBuilder[ProjectCard, A]): SelectionBuilder[MovedColumnsInProjectEvent, Option[A]] =
+      Field("projectCard", OptionOf(Obj(innerSelection)))
+    /**
+      * Column name the issue or pull request was moved to.
+      */
+    def projectColumnName: SelectionBuilder[MovedColumnsInProjectEvent, String] = Field("projectColumnName", Scalar())
   }
 
   type OauthApplicationCreateAuditEntry
@@ -17075,11 +17788,16 @@ for all of the organizations the user owns.
           Argument("orderBy", orderBy))
       )
     /**
+      * Check if the given account is sponsoring this user/organization.
+      */
+    def isSponsoredBy(accountLogin: String): SelectionBuilder[Organization, Boolean] =
+      Field("isSponsoredBy", Scalar(), arguments = List(Argument("accountLogin", accountLogin)))
+    /**
       * True if the viewer is sponsored by this user/organization.
       */
     def isSponsoringViewer: SelectionBuilder[Organization, Boolean] = Field("isSponsoringViewer", Scalar())
     /**
-      * Whether the organization has verified its profile email and website, always false on Enterprise.
+      * Whether the organization has verified its profile email and website.
       */
     def isVerified: SelectionBuilder[Organization, Boolean] = Field("isVerified", Scalar())
     /**
@@ -17142,6 +17860,12 @@ either curated or that have been selected automatically based on popularity.
       * The HTTP URL creating a new team
       */
     def newTeamUrl: SelectionBuilder[Organization, URI] = Field("newTeamUrl", Scalar())
+    /**
+      * Indicates if email notification delivery for this organization is restricted to verified or approved domains.
+      */
+    def notificationDeliveryRestrictionEnabledSetting
+      : SelectionBuilder[Organization, NotificationRestrictionSettingValue] =
+      Field("notificationDeliveryRestrictionEnabledSetting", Scalar())
     /**
       * The billing email for the organization.
       */
@@ -17330,6 +18054,12 @@ collaborators to enable two-factor authentication.
     def sponsorsListing[A](
       innerSelection: SelectionBuilder[SponsorsListing, A]): SelectionBuilder[Organization, Option[A]] =
       Field("sponsorsListing", OptionOf(Obj(innerSelection)))
+    /**
+      * The viewer's sponsorship of this entity.
+      */
+    def sponsorshipForViewerAsSponsor[A](
+      innerSelection: SelectionBuilder[Sponsorship, A]): SelectionBuilder[Organization, Option[A]] =
+      Field("sponsorshipForViewerAsSponsor", OptionOf(Obj(innerSelection)))
     /**
       * This object's sponsorships as the maintainer.
       */
@@ -18405,6 +19135,20 @@ collaborators to enable two-factor authentication.
         ChoiceOf(Map("Organization" -> Obj(onOrganization), "Repository" -> Obj(onRepository), "Team" -> Obj(onTeam))))
   }
 
+  type PinIssuePayload
+  object PinIssuePayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[PinIssuePayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The issue that was pinned
+      */
+    def issue[A](innerSelection: SelectionBuilder[Issue, A]): SelectionBuilder[PinIssuePayload, Option[A]] =
+      Field("issue", OptionOf(Obj(innerSelection)))
+  }
+
   type PinnableItemConnection
   object PinnableItemConnection {
     /**
@@ -18479,6 +19223,82 @@ collaborators to enable two-factor authentication.
       */
     def issue[A](innerSelection: SelectionBuilder[Issue, A]): SelectionBuilder[PinnedEvent, A] =
       Field("issue", Obj(innerSelection))
+  }
+
+  type PinnedIssue
+  object PinnedIssue {
+    /**
+      * Identifies the primary key from the database.
+      */
+    def databaseId: SelectionBuilder[PinnedIssue, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
+    def id: SelectionBuilder[PinnedIssue, String] = Field("id", Scalar())
+    /**
+      * The issue that was pinned.
+      */
+    def issue[A](innerSelection: SelectionBuilder[Issue, A]): SelectionBuilder[PinnedIssue, A] =
+      Field("issue", Obj(innerSelection))
+    /**
+      * The actor that pinned this issue.
+      */
+    def pinnedBy[A](
+      onBot: Option[SelectionBuilder[Bot, A]] = None,
+      onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onMannequin: Option[SelectionBuilder[Mannequin, A]] = None,
+      onUser: Option[SelectionBuilder[User, A]] = None,
+      onOrganization: Option[SelectionBuilder[Organization, A]] = None): SelectionBuilder[PinnedIssue, A] =
+      Field(
+        "pinnedBy",
+        ChoiceOf(
+          Map(
+            "Bot" -> onBot,
+            "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+            "Mannequin" -> onMannequin,
+            "User" -> onUser,
+            "Organization" -> onOrganization).collect { case (k, Some(v)) => k -> Obj(v) })
+      )
+    /**
+      * The repository that this issue was pinned to.
+      */
+    def repository[A](innerSelection: SelectionBuilder[Repository, A]): SelectionBuilder[PinnedIssue, A] =
+      Field("repository", Obj(innerSelection))
+  }
+
+  type PinnedIssueConnection
+  object PinnedIssueConnection {
+    /**
+      * A list of edges.
+      */
+    def edges[A](innerSelection: SelectionBuilder[PinnedIssueEdge, A])
+      : SelectionBuilder[PinnedIssueConnection, Option[List[Option[A]]]] =
+      Field("edges", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * A list of nodes.
+      */
+    def nodes[A](innerSelection: SelectionBuilder[PinnedIssue, A])
+      : SelectionBuilder[PinnedIssueConnection, Option[List[Option[A]]]] =
+      Field("nodes", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * Information to aid in pagination.
+      */
+    def pageInfo[A](innerSelection: SelectionBuilder[PageInfo, A]): SelectionBuilder[PinnedIssueConnection, A] =
+      Field("pageInfo", Obj(innerSelection))
+    /**
+      * Identifies the total count of items in the connection.
+      */
+    def totalCount: SelectionBuilder[PinnedIssueConnection, Int] = Field("totalCount", Scalar())
+  }
+
+  type PinnedIssueEdge
+  object PinnedIssueEdge {
+    /**
+      * A cursor for use in pagination.
+      */
+    def cursor: SelectionBuilder[PinnedIssueEdge, String] = Field("cursor", Scalar())
+    /**
+      * The item at the end of the edge.
+      */
+    def node[A](innerSelection: SelectionBuilder[PinnedIssue, A]): SelectionBuilder[PinnedIssueEdge, Option[A]] =
+      Field("node", OptionOf(Obj(innerSelection)))
   }
 
   type PrivateRepositoryForkingDisableAuditEntry
@@ -19300,6 +20120,12 @@ owned by the user.
     def authorAssociation: SelectionBuilder[PullRequest, CommentAuthorAssociation] =
       Field("authorAssociation", Scalar())
     /**
+      * Returns the auto-merge request object if one exists for this pull request.
+      */
+    def autoMergeRequest[A](
+      innerSelection: SelectionBuilder[AutoMergeRequest, A]): SelectionBuilder[PullRequest, Option[A]] =
+      Field("autoMergeRequest", OptionOf(Obj(innerSelection)))
+    /**
       * Identifies the base Ref associated with the pull request.
       */
     def baseRef[A](innerSelection: SelectionBuilder[Ref, A]): SelectionBuilder[PullRequest, Option[A]] =
@@ -19329,6 +20155,10 @@ owned by the user.
       * The body rendered to text.
       */
     def bodyText: SelectionBuilder[PullRequest, String] = Field("bodyText", Scalar())
+    /**
+      * Whether or not the pull request is rebaseable.
+      */
+    def canBeRebased: SelectionBuilder[PullRequest, Boolean] = Field("canBeRebased", Scalar())
     /**
       * The number of changed files in this pull request.
       */
@@ -19560,6 +20390,10 @@ owned by the user.
       */
     def mergeCommit[A](innerSelection: SelectionBuilder[Commit, A]): SelectionBuilder[PullRequest, Option[A]] =
       Field("mergeCommit", OptionOf(Obj(innerSelection)))
+    /**
+      * Detailed information about the current pull request merge state status.
+      */
+    def mergeStateStatus: SelectionBuilder[PullRequest, MergeStateStatus] = Field("mergeStateStatus", Scalar())
     /**
       * Whether or not the pull request can be merged based on the existence of merge conflicts.
       */
@@ -19844,6 +20678,14 @@ merged, or if the test merge commit is still being generated. See the
       */
     def viewerCanDeleteHeadRef: SelectionBuilder[PullRequest, Boolean] = Field("viewerCanDeleteHeadRef", Scalar())
     /**
+      * Whether or not the viewer can disable auto-merge
+      */
+    def viewerCanDisableAutoMerge: SelectionBuilder[PullRequest, Boolean] = Field("viewerCanDisableAutoMerge", Scalar())
+    /**
+      * Whether or not the viewer can enable auto-merge
+      */
+    def viewerCanEnableAutoMerge: SelectionBuilder[PullRequest, Boolean] = Field("viewerCanEnableAutoMerge", Scalar())
+    /**
       * Can user react to this subject
       */
     def viewerCanReact: SelectionBuilder[PullRequest, Boolean] = Field("viewerCanReact", Scalar())
@@ -19864,6 +20706,18 @@ merged, or if the test merge commit is still being generated. See the
       * Did the viewer author this comment.
       */
     def viewerDidAuthor: SelectionBuilder[PullRequest, Boolean] = Field("viewerDidAuthor", Scalar())
+    /**
+      * The latest review given from the viewer.
+      */
+    def viewerLatestReview[A](
+      innerSelection: SelectionBuilder[PullRequestReview, A]): SelectionBuilder[PullRequest, Option[A]] =
+      Field("viewerLatestReview", OptionOf(Obj(innerSelection)))
+    /**
+      * The person who has requested the viewer for review on this pull request.
+      */
+    def viewerLatestReviewRequest[A](
+      innerSelection: SelectionBuilder[ReviewRequest, A]): SelectionBuilder[PullRequest, Option[A]] =
+      Field("viewerLatestReviewRequest", OptionOf(Obj(innerSelection)))
     /**
       * The merge body text for the viewer and method.
       */
@@ -20840,6 +21694,23 @@ merged, or if the test merge commit is still being generated. See the
       Field("pullRequest", Obj(innerSelection))
   }
 
+  type PullRequestTemplate
+  object PullRequestTemplate {
+    /**
+      * The body of the template
+      */
+    def body: SelectionBuilder[PullRequestTemplate, Option[String]] = Field("body", OptionOf(Scalar()))
+    /**
+      * The filename of the template
+      */
+    def filename: SelectionBuilder[PullRequestTemplate, Option[String]] = Field("filename", OptionOf(Scalar()))
+    /**
+      * The repository the template belongs to
+      */
+    def repository[A](innerSelection: SelectionBuilder[Repository, A]): SelectionBuilder[PullRequestTemplate, A] =
+      Field("repository", Obj(innerSelection))
+  }
+
   type PullRequestTimelineConnection
   object PullRequestTimelineConnection {
     /**
@@ -21776,6 +22647,10 @@ merged, or if the test merge commit is still being generated. See the
     def requiredStatusCheckContexts: SelectionBuilder[RefUpdateRule, Option[List[Option[String]]]] =
       Field("requiredStatusCheckContexts", OptionOf(ListOf(OptionOf(Scalar()))))
     /**
+      * Are reviews from code owners required to update matching branches.
+      */
+    def requiresCodeOwnerReviews: SelectionBuilder[RefUpdateRule, Boolean] = Field("requiresCodeOwnerReviews", Scalar())
+    /**
       * Are merge commits prohibited from being pushed to this branch.
       */
     def requiresLinearHistory: SelectionBuilder[RefUpdateRule, Boolean] = Field("requiresLinearHistory", Scalar())
@@ -21783,6 +22658,11 @@ merged, or if the test merge commit is still being generated. See the
       * Are commits required to be signed.
       */
     def requiresSignatures: SelectionBuilder[RefUpdateRule, Boolean] = Field("requiresSignatures", Scalar())
+    /**
+      * Is the viewer allowed to dismiss reviews.
+      */
+    def viewerAllowedToDismissReviews: SelectionBuilder[RefUpdateRule, Boolean] =
+      Field("viewerAllowedToDismissReviews", Scalar())
     /**
       * Can the viewer push to the branch
       */
@@ -21933,6 +22813,11 @@ merged, or if the test merge commit is still being generated. See the
           Argument("name", name))
       )
     /**
+      * The repository that the release belongs to.
+      */
+    def repository[A](innerSelection: SelectionBuilder[Repository, A]): SelectionBuilder[Release, A] =
+      Field("repository", Obj(innerSelection))
+    /**
       * The HTTP path for this issue
       */
     def resourcePath: SelectionBuilder[Release, URI] = Field("resourcePath", Scalar())
@@ -21946,6 +22831,11 @@ merged, or if the test merge commit is still being generated. See the
       */
     def tag[A](innerSelection: SelectionBuilder[Ref, A]): SelectionBuilder[Release, Option[A]] =
       Field("tag", OptionOf(Obj(innerSelection)))
+    /**
+      * The tag commit for this release.
+      */
+    def tagCommit[A](innerSelection: SelectionBuilder[Commit, A]): SelectionBuilder[Release, Option[A]] =
+      Field("tagCommit", OptionOf(Obj(innerSelection)))
     /**
       * The name of the release's Git tag
       */
@@ -22320,6 +23210,15 @@ merged, or if the test merge commit is still being generated. See the
       */
     def databaseId: SelectionBuilder[RemovedFromProjectEvent, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
     def id: SelectionBuilder[RemovedFromProjectEvent, String] = Field("id", Scalar())
+    /**
+      * Project referenced by event.
+      */
+    def project[A](innerSelection: SelectionBuilder[Project, A]): SelectionBuilder[RemovedFromProjectEvent, Option[A]] =
+      Field("project", OptionOf(Obj(innerSelection)))
+    /**
+      * Column name referenced by this project event.
+      */
+    def projectColumnName: SelectionBuilder[RemovedFromProjectEvent, String] = Field("projectColumnName", Scalar())
   }
 
   type RenamedTitleEvent
@@ -24797,6 +25696,31 @@ merged, or if the test merge commit is still being generated. See the
       */
     def deleteBranchOnMerge: SelectionBuilder[Repository, Boolean] = Field("deleteBranchOnMerge", Scalar())
     /**
+      * A list of dependency manifests contained in the repository
+      */
+    def dependencyGraphManifests[A](
+      after: Option[String] = None,
+      before: Option[String] = None,
+      dependenciesAfter: Option[String] = None,
+      dependenciesFirst: Option[Int] = None,
+      first: Option[Int] = None,
+      last: Option[Int] = None,
+      withDependencies: Option[Boolean] = None)(
+      innerSelection: SelectionBuilder[DependencyGraphManifestConnection, A]): SelectionBuilder[Repository, Option[A]] =
+      Field(
+        "dependencyGraphManifests",
+        OptionOf(Obj(innerSelection)),
+        arguments = List(
+          Argument("after", after),
+          Argument("before", before),
+          Argument("dependenciesAfter", dependenciesAfter),
+          Argument("dependenciesFirst", dependenciesFirst),
+          Argument("first", first),
+          Argument("last", last),
+          Argument("withDependencies", withDependencies)
+        )
+      )
+    /**
       * A list of deploy keys that are on this repository.
       */
     def deployKeys[A](
@@ -24939,7 +25863,7 @@ merged, or if the test merge commit is still being generated. See the
       */
     def isMirror: SelectionBuilder[Repository, Boolean] = Field("isMirror", Scalar())
     /**
-      * Identifies if the repository is private.
+      * Identifies if the repository is private or internal.
       */
     def isPrivate: SelectionBuilder[Repository, Boolean] = Field("isPrivate", Scalar())
     /**
@@ -25193,6 +26117,21 @@ merged, or if the test merge commit is still being generated. See the
     def parent[A](innerSelection: SelectionBuilder[Repository, A]): SelectionBuilder[Repository, Option[A]] =
       Field("parent", OptionOf(Obj(innerSelection)))
     /**
+      * A list of pinned issues for this repository.
+      */
+    def pinnedIssues[A](
+      after: Option[String] = None,
+      before: Option[String] = None,
+      first: Option[Int] = None,
+      last: Option[Int] = None)(
+      innerSelection: SelectionBuilder[PinnedIssueConnection, A]): SelectionBuilder[Repository, Option[A]] =
+      Field(
+        "pinnedIssues",
+        OptionOf(Obj(innerSelection)),
+        arguments =
+          List(Argument("after", after), Argument("before", before), Argument("first", first), Argument("last", last))
+      )
+    /**
       * The primary language of the repository's code.
       */
     def primaryLanguage[A](innerSelection: SelectionBuilder[Language, A]): SelectionBuilder[Repository, Option[A]] =
@@ -25241,6 +26180,12 @@ merged, or if the test merge commit is still being generated. See the
     def pullRequest[A](number: Int)(
       innerSelection: SelectionBuilder[PullRequest, A]): SelectionBuilder[Repository, Option[A]] =
       Field("pullRequest", OptionOf(Obj(innerSelection)), arguments = List(Argument("number", number)))
+    /**
+      * Returns a list of pull request templates associated to the repository
+      */
+    def pullRequestTemplates[A](
+      innerSelection: SelectionBuilder[PullRequestTemplate, A]): SelectionBuilder[Repository, Option[List[A]]] =
+      Field("pullRequestTemplates", OptionOf(ListOf(Obj(innerSelection))))
     /**
       * A list of pull requests that have been opened in the repository.
       */
@@ -26664,6 +27609,25 @@ longer access.
   type SecurityAdvisory
   object SecurityAdvisory {
     /**
+      * The CVSS associated with this advisory
+      */
+    def cvss[A](innerSelection: SelectionBuilder[CVSS, A]): SelectionBuilder[SecurityAdvisory, A] =
+      Field("cvss", Obj(innerSelection))
+    /**
+      * CWEs associated with this Advisory
+      */
+    def cwes[A](
+      after: Option[String] = None,
+      before: Option[String] = None,
+      first: Option[Int] = None,
+      last: Option[Int] = None)(
+      innerSelection: SelectionBuilder[CWEConnection, A]): SelectionBuilder[SecurityAdvisory, A] =
+      Field(
+        "cwes",
+        Obj(innerSelection),
+        arguments =
+          List(Argument("after", after), Argument("before", before), Argument("first", first), Argument("last", last)))
+    /**
       * Identifies the primary key from the database.
       */
     def databaseId: SelectionBuilder[SecurityAdvisory, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
@@ -26682,6 +27646,11 @@ longer access.
     def identifiers[A](
       innerSelection: SelectionBuilder[SecurityAdvisoryIdentifier, A]): SelectionBuilder[SecurityAdvisory, List[A]] =
       Field("identifiers", ListOf(Obj(innerSelection)))
+    /**
+      * The permalink for the advisory's dependabot alerts page
+      */
+    def notificationsPermalink: SelectionBuilder[SecurityAdvisory, Option[URI]] =
+      Field("notificationsPermalink", OptionOf(Scalar()))
     /**
       * The organization that originated the advisory
       */
@@ -26996,8 +27965,81 @@ GitHub, otherwise represents reason why signature is considered invalid.
     def wasSignedByGitHub: SelectionBuilder[SmimeSignature, Boolean] = Field("wasSignedByGitHub", Scalar())
   }
 
+  type SponsorableItemConnection
+  object SponsorableItemConnection {
+    /**
+      * A list of edges.
+      */
+    def edges[A](innerSelection: SelectionBuilder[SponsorableItemEdge, A])
+      : SelectionBuilder[SponsorableItemConnection, Option[List[Option[A]]]] =
+      Field("edges", OptionOf(ListOf(OptionOf(Obj(innerSelection)))))
+    /**
+      * A list of nodes.
+      */
+    def nodes[A](
+      onOrganization: SelectionBuilder[Organization, A],
+      onUser: SelectionBuilder[User, A]): SelectionBuilder[SponsorableItemConnection, Option[List[Option[A]]]] =
+      Field(
+        "nodes",
+        OptionOf(ListOf(OptionOf(ChoiceOf(Map("Organization" -> Obj(onOrganization), "User" -> Obj(onUser)))))))
+    /**
+      * Information to aid in pagination.
+      */
+    def pageInfo[A](innerSelection: SelectionBuilder[PageInfo, A]): SelectionBuilder[SponsorableItemConnection, A] =
+      Field("pageInfo", Obj(innerSelection))
+    /**
+      * Identifies the total count of items in the connection.
+      */
+    def totalCount: SelectionBuilder[SponsorableItemConnection, Int] = Field("totalCount", Scalar())
+  }
+
+  type SponsorableItemEdge
+  object SponsorableItemEdge {
+    /**
+      * A cursor for use in pagination.
+      */
+    def cursor: SelectionBuilder[SponsorableItemEdge, String] = Field("cursor", Scalar())
+    /**
+      * The item at the end of the edge.
+      */
+    def node[A](
+      onOrganization: SelectionBuilder[Organization, A],
+      onUser: SelectionBuilder[User, A]): SelectionBuilder[SponsorableItemEdge, Option[A]] =
+      Field("node", OptionOf(ChoiceOf(Map("Organization" -> Obj(onOrganization), "User" -> Obj(onUser)))))
+  }
+
+  type SponsorsGoal
+  object SponsorsGoal {
+    /**
+      * A description of the goal from the maintainer.
+      */
+    def description: SelectionBuilder[SponsorsGoal, Option[String]] = Field("description", OptionOf(Scalar()))
+    /**
+      * What the objective of this goal is.
+      */
+    def kind: SelectionBuilder[SponsorsGoal, SponsorsGoalKind] = Field("kind", Scalar())
+    /**
+      * The percentage representing how complete this goal is, between 0-100.
+      */
+    def percentComplete: SelectionBuilder[SponsorsGoal, Int] = Field("percentComplete", Scalar())
+    /**
+      * What the goal amount is. Represents a dollar amount for monthly sponsorship
+amount goals. Represents a count of unique sponsors for total sponsors count goals.
+      */
+    def targetValue: SelectionBuilder[SponsorsGoal, Int] = Field("targetValue", Scalar())
+    /**
+      * A brief summary of the kind and target value of this goal.
+      */
+    def title: SelectionBuilder[SponsorsGoal, String] = Field("title", Scalar())
+  }
+
   type SponsorsListing
   object SponsorsListing {
+    /**
+      * The current goal the maintainer is trying to reach with GitHub Sponsors, if any.
+      */
+    def activeGoal[A](innerSelection: SelectionBuilder[SponsorsGoal, A]): SelectionBuilder[SponsorsListing, Option[A]] =
+      Field("activeGoal", OptionOf(Obj(innerSelection)))
     /**
       * Identifies the date and time when the object was created.
       */
@@ -27054,6 +28096,14 @@ GitHub, otherwise represents reason why signature is considered invalid.
       innerSelection: SelectionBuilder[SponsorsTierAdminInfo, A]): SelectionBuilder[SponsorsTier, Option[A]] =
       Field("adminInfo", OptionOf(Obj(innerSelection)))
     /**
+      * Get a different tier for this tier's maintainer that is at the same frequency
+as this tier but with a lesser cost. Returns the published tier with the
+monthly price closest to this tier's without going over.
+      */
+    def closestLesserValueTier[A](
+      innerSelection: SelectionBuilder[SponsorsTier, A]): SelectionBuilder[SponsorsTier, Option[A]] =
+      Field("closestLesserValueTier", OptionOf(Obj(innerSelection)))
+    /**
       * Identifies the date and time when the object was created.
       */
     def createdAt: SelectionBuilder[SponsorsTier, DateTime] = Field("createdAt", Scalar())
@@ -27066,6 +28116,15 @@ GitHub, otherwise represents reason why signature is considered invalid.
       */
     def descriptionHTML: SelectionBuilder[SponsorsTier, HTML] = Field("descriptionHTML", Scalar())
     def id: SelectionBuilder[SponsorsTier, String] = Field("id", Scalar())
+    /**
+      * Whether this tier was chosen at checkout time by the sponsor rather than
+defined ahead of time by the maintainer who manages the Sponsors listing.
+      */
+    def isCustomAmount: SelectionBuilder[SponsorsTier, Boolean] = Field("isCustomAmount", Scalar())
+    /**
+      * Whether this tier is only for use with one-time sponsorships.
+      */
+    def isOneTime: SelectionBuilder[SponsorsTier, Boolean] = Field("isOneTime", Scalar())
     /**
       * How much this tier costs per month in cents.
       */
@@ -27162,6 +28221,10 @@ GitHub, otherwise represents reason why signature is considered invalid.
     def createdAt: SelectionBuilder[Sponsorship, DateTime] = Field("createdAt", Scalar())
     def id: SelectionBuilder[Sponsorship, String] = Field("id", Scalar())
     /**
+      * Whether this sponsorship represents a one-time payment versus a recurring sponsorship.
+      */
+    def isOneTimePayment: SelectionBuilder[Sponsorship, Boolean] = Field("isOneTimePayment", Scalar())
+    /**
       * The entity that is being sponsored
       */
     @deprecated(
@@ -27202,6 +28265,10 @@ GitHub, otherwise represents reason why signature is considered invalid.
       */
     def tier[A](innerSelection: SelectionBuilder[SponsorsTier, A]): SelectionBuilder[Sponsorship, Option[A]] =
       Field("tier", OptionOf(Obj(innerSelection)))
+    /**
+      * Identifies the date and time when the current tier was chosen for this sponsorship.
+      */
+    def tierSelectedAt: SelectionBuilder[Sponsorship, Option[DateTime]] = Field("tierSelectedAt", OptionOf(Scalar()))
   }
 
   type SponsorshipConnection
@@ -27481,6 +28548,16 @@ GitHub, otherwise represents reason why signature is considered invalid.
       */
     def description: SelectionBuilder[StatusContext, Option[String]] = Field("description", OptionOf(Scalar()))
     def id: SelectionBuilder[StatusContext, String] = Field("id", Scalar())
+    /**
+      * Whether this is required to pass before merging for a specific pull request.
+      */
+    def isRequired(
+      pullRequestId: Option[String] = None,
+      pullRequestNumber: Option[Int] = None): SelectionBuilder[StatusContext, Boolean] =
+      Field(
+        "isRequired",
+        Scalar(),
+        arguments = List(Argument("pullRequestId", pullRequestId), Argument("pullRequestNumber", pullRequestNumber)))
     /**
       * The state of this status context.
       */
@@ -27925,6 +29002,26 @@ GitHub, otherwise represents reason why signature is considered invalid.
       * The HTTP path for this team
       */
     def resourcePath: SelectionBuilder[Team, URI] = Field("resourcePath", Scalar())
+    /**
+      * What algorithm is used for review assignment for this team
+      */
+    def reviewRequestDelegationAlgorithm: SelectionBuilder[Team, Option[TeamReviewAssignmentAlgorithm]] =
+      Field("reviewRequestDelegationAlgorithm", OptionOf(Scalar()))
+    /**
+      * True if review assignment is enabled for this team
+      */
+    def reviewRequestDelegationEnabled: SelectionBuilder[Team, Boolean] =
+      Field("reviewRequestDelegationEnabled", Scalar())
+    /**
+      * How many team members are required for review assignment for this team
+      */
+    def reviewRequestDelegationMemberCount: SelectionBuilder[Team, Option[Int]] =
+      Field("reviewRequestDelegationMemberCount", OptionOf(Scalar()))
+    /**
+      * When assigning team members via delegation, whether the entire team should be notified as well.
+      */
+    def reviewRequestDelegationNotifyTeam: SelectionBuilder[Team, Boolean] =
+      Field("reviewRequestDelegationNotifyTeam", Scalar())
     /**
       * The slug corresponding to the team.
       */
@@ -29826,6 +30923,20 @@ GitHub, otherwise represents reason why signature is considered invalid.
       )
   }
 
+  type UnpinIssuePayload
+  object UnpinIssuePayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[UnpinIssuePayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The issue that was unpinned
+      */
+    def issue[A](innerSelection: SelectionBuilder[Issue, A]): SelectionBuilder[UnpinIssuePayload, Option[A]] =
+      Field("issue", OptionOf(Obj(innerSelection)))
+  }
+
   type UnpinnedEvent
   object UnpinnedEvent {
     /**
@@ -30012,13 +31123,13 @@ GitHub, otherwise represents reason why signature is considered invalid.
     def clientMutationId: SelectionBuilder[UpdateEnterpriseDefaultRepositoryPermissionSettingPayload, Option[String]] =
       Field("clientMutationId", OptionOf(Scalar()))
     /**
-      * The enterprise with the updated default repository permission setting.
+      * The enterprise with the updated base repository permission setting.
       */
     def enterprise[A](innerSelection: SelectionBuilder[Enterprise, A])
       : SelectionBuilder[UpdateEnterpriseDefaultRepositoryPermissionSettingPayload, Option[A]] =
       Field("enterprise", OptionOf(Obj(innerSelection)))
     /**
-      * A message confirming the result of updating the default repository permission setting.
+      * A message confirming the result of updating the base repository permission setting.
       */
     def message: SelectionBuilder[UpdateEnterpriseDefaultRepositoryPermissionSettingPayload, Option[String]] =
       Field("message", OptionOf(Scalar()))
@@ -30364,6 +31475,35 @@ GitHub, otherwise represents reason why signature is considered invalid.
       Field("issue", OptionOf(Obj(innerSelection)))
   }
 
+  type UpdateLabelPayload
+  object UpdateLabelPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[UpdateLabelPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The updated label.
+      */
+    def label[A](innerSelection: SelectionBuilder[Label, A]): SelectionBuilder[UpdateLabelPayload, Option[A]] =
+      Field("label", OptionOf(Obj(innerSelection)))
+  }
+
+  type UpdateNotificationRestrictionSettingPayload
+  object UpdateNotificationRestrictionSettingPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[UpdateNotificationRestrictionSettingPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The owner on which the setting was updated.
+      */
+    def owner[A](onEnterprise: SelectionBuilder[Enterprise, A], onOrganization: SelectionBuilder[Organization, A])
+      : SelectionBuilder[UpdateNotificationRestrictionSettingPayload, Option[A]] =
+      Field("owner", OptionOf(ChoiceOf(Map("Enterprise" -> Obj(onEnterprise), "Organization" -> Obj(onOrganization)))))
+  }
+
   type UpdateProjectCardPayload
   object UpdateProjectCardPayload {
     /**
@@ -30488,6 +31628,15 @@ GitHub, otherwise represents reason why signature is considered invalid.
       Field("ref", OptionOf(Obj(innerSelection)))
   }
 
+  type UpdateRefsPayload
+  object UpdateRefsPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[UpdateRefsPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+  }
+
   type UpdateRepositoryPayload
   object UpdateRepositoryPayload {
     /**
@@ -30563,6 +31712,21 @@ GitHub, otherwise represents reason why signature is considered invalid.
     def teamDiscussion[A](
       innerSelection: SelectionBuilder[TeamDiscussion, A]): SelectionBuilder[UpdateTeamDiscussionPayload, Option[A]] =
       Field("teamDiscussion", OptionOf(Obj(innerSelection)))
+  }
+
+  type UpdateTeamReviewAssignmentPayload
+  object UpdateTeamReviewAssignmentPayload {
+    /**
+      * A unique identifier for the client performing the mutation.
+      */
+    def clientMutationId: SelectionBuilder[UpdateTeamReviewAssignmentPayload, Option[String]] =
+      Field("clientMutationId", OptionOf(Scalar()))
+    /**
+      * The team that was modified
+      */
+    def team[A](
+      innerSelection: SelectionBuilder[Team, A]): SelectionBuilder[UpdateTeamReviewAssignmentPayload, Option[A]] =
+      Field("team", OptionOf(Obj(innerSelection)))
   }
 
   type UpdateTopicsPayload
@@ -30752,6 +31916,10 @@ GitHub, otherwise represents reason why signature is considered invalid.
       */
     def isEmployee: SelectionBuilder[User, Boolean] = Field("isEmployee", Scalar())
     /**
+      * Whether or not this user is a member of the GitHub Stars Program.
+      */
+    def isGitHubStar: SelectionBuilder[User, Boolean] = Field("isGitHubStar", Scalar())
+    /**
       * Whether or not the user has marked themselves as for hire.
       */
     def isHireable: SelectionBuilder[User, Boolean] = Field("isHireable", Scalar())
@@ -30759,6 +31927,11 @@ GitHub, otherwise represents reason why signature is considered invalid.
       * Whether or not this user is a site administrator.
       */
     def isSiteAdmin: SelectionBuilder[User, Boolean] = Field("isSiteAdmin", Scalar())
+    /**
+      * Check if the given account is sponsoring this user/organization.
+      */
+    def isSponsoredBy(accountLogin: String): SelectionBuilder[User, Boolean] =
+      Field("isSponsoredBy", Scalar(), arguments = List(Argument("accountLogin", accountLogin)))
     /**
       * True if the viewer is sponsored by this user/organization.
       */
@@ -31103,6 +32276,12 @@ either curated or that have been selected automatically based on popularity.
       */
     def sponsorsListing[A](innerSelection: SelectionBuilder[SponsorsListing, A]): SelectionBuilder[User, Option[A]] =
       Field("sponsorsListing", OptionOf(Obj(innerSelection)))
+    /**
+      * The viewer's sponsorship of this entity.
+      */
+    def sponsorshipForViewerAsSponsor[A](
+      innerSelection: SelectionBuilder[Sponsorship, A]): SelectionBuilder[User, Option[A]] =
+      Field("sponsorshipForViewerAsSponsor", OptionOf(Obj(innerSelection)))
     /**
       * This object's sponsorships as the maintainer.
       */
@@ -31550,6 +32729,10 @@ either curated or that have been selected automatically based on popularity.
   type VerifiableDomain
   object VerifiableDomain {
     /**
+      * Identifies the date and time when the object was created.
+      */
+    def createdAt: SelectionBuilder[VerifiableDomain, DateTime] = Field("createdAt", Scalar())
+    /**
       * Identifies the primary key from the database.
       */
     def databaseId: SelectionBuilder[VerifiableDomain, Option[Int]] = Field("databaseId", OptionOf(Scalar()))
@@ -31572,7 +32755,7 @@ either curated or that have been selected automatically based on popularity.
       Field("hasFoundVerificationToken", Scalar())
     def id: SelectionBuilder[VerifiableDomain, String] = Field("id", Scalar())
     /**
-      * Whether this domain is required to exist for an organization policy to be enforced.
+      * Whether this domain is required to exist for an organization or enterprise policy to be enforced.
       */
     def isRequiredForPolicyEnforcement: SelectionBuilder[VerifiableDomain, Boolean] =
       Field("isRequiredForPolicyEnforcement", Scalar())
@@ -31596,6 +32779,10 @@ either curated or that have been selected automatically based on popularity.
       */
     def tokenExpirationTime: SelectionBuilder[VerifiableDomain, Option[DateTime]] =
       Field("tokenExpirationTime", OptionOf(Scalar()))
+    /**
+      * Identifies the date and time when the object was last updated.
+      */
+    def updatedAt: SelectionBuilder[VerifiableDomain, DateTime] = Field("updatedAt", Scalar())
     /**
       * The current verification token for the domain.
       */
@@ -31940,6 +33127,19 @@ either curated or that have been selected automatically based on popularity.
             "ownerId" -> implicitly[ArgEncoder[String]].encode(value.ownerId)
           ))
       override def typeName: String = "AddVerifiableDomainInput"
+    }
+  }
+  case class ApproveVerifiableDomainInput(clientMutationId: Option[String] = None, id: String)
+  object ApproveVerifiableDomainInput {
+    implicit val encoder: ArgEncoder[ApproveVerifiableDomainInput] = new ArgEncoder[ApproveVerifiableDomainInput] {
+      override def encode(value: ApproveVerifiableDomainInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "id" -> implicitly[ArgEncoder[String]].encode(value.id)
+          ))
+      override def typeName: String = "ApproveVerifiableDomainInput"
     }
   }
   case class ArchiveRepositoryInput(clientMutationId: Option[String] = None, repositoryId: String)
@@ -32294,6 +33494,19 @@ either curated or that have been selected automatically based on popularity.
         override def typeName: String = "ConvertProjectCardNoteToIssueInput"
       }
   }
+  case class ConvertPullRequestToDraftInput(clientMutationId: Option[String] = None, pullRequestId: String)
+  object ConvertPullRequestToDraftInput {
+    implicit val encoder: ArgEncoder[ConvertPullRequestToDraftInput] = new ArgEncoder[ConvertPullRequestToDraftInput] {
+      override def encode(value: ConvertPullRequestToDraftInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "pullRequestId" -> implicitly[ArgEncoder[String]].encode(value.pullRequestId)
+          ))
+      override def typeName: String = "ConvertPullRequestToDraftInput"
+    }
+  }
   case class CreateBranchProtectionRuleInput(
     allowsDeletions: Option[Boolean] = None,
     allowsForcePushes: Option[Boolean] = None,
@@ -32417,6 +33630,90 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "CreateCheckSuiteInput"
     }
   }
+  case class CreateContentAttachmentInput(
+    body: String,
+    clientMutationId: Option[String] = None,
+    contentReferenceId: String,
+    title: String)
+  object CreateContentAttachmentInput {
+    implicit val encoder: ArgEncoder[CreateContentAttachmentInput] = new ArgEncoder[CreateContentAttachmentInput] {
+      override def encode(value: CreateContentAttachmentInput): __Value =
+        __ObjectValue(
+          List(
+            "body" -> implicitly[ArgEncoder[String]].encode(value.body),
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "contentReferenceId" -> implicitly[ArgEncoder[String]].encode(value.contentReferenceId),
+            "title" -> implicitly[ArgEncoder[String]].encode(value.title)
+          ))
+      override def typeName: String = "CreateContentAttachmentInput"
+    }
+  }
+  case class CreateDeploymentInput(
+    autoMerge: Option[Boolean] = None,
+    clientMutationId: Option[String] = None,
+    description: Option[String] = None,
+    environment: Option[String] = None,
+    payload: Option[String] = None,
+    refId: String,
+    repositoryId: String,
+    requiredContexts: Option[List[String]] = None,
+    task: Option[String] = None)
+  object CreateDeploymentInput {
+    implicit val encoder: ArgEncoder[CreateDeploymentInput] = new ArgEncoder[CreateDeploymentInput] {
+      override def encode(value: CreateDeploymentInput): __Value =
+        __ObjectValue(
+          List(
+            "autoMerge" -> value.autoMerge.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[Boolean]].encode(value)),
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "description" -> value.description.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "environment" -> value.environment.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "payload" -> value.payload.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "refId" -> implicitly[ArgEncoder[String]].encode(value.refId),
+            "repositoryId" -> implicitly[ArgEncoder[String]].encode(value.repositoryId),
+            "requiredContexts" -> value.requiredContexts.fold(__NullValue: __Value)(value =>
+              __ListValue(value.map(value => implicitly[ArgEncoder[String]].encode(value)))),
+            "task" -> value.task.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[String]].encode(value))
+          ))
+      override def typeName: String = "CreateDeploymentInput"
+    }
+  }
+  case class CreateDeploymentStatusInput(
+    autoInactive: Option[Boolean] = None,
+    clientMutationId: Option[String] = None,
+    deploymentId: String,
+    description: Option[String] = None,
+    environment: Option[String] = None,
+    environmentUrl: Option[String] = None,
+    logUrl: Option[String] = None,
+    state: DeploymentStatusState)
+  object CreateDeploymentStatusInput {
+    implicit val encoder: ArgEncoder[CreateDeploymentStatusInput] = new ArgEncoder[CreateDeploymentStatusInput] {
+      override def encode(value: CreateDeploymentStatusInput): __Value =
+        __ObjectValue(
+          List(
+            "autoInactive" -> value.autoInactive.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[Boolean]].encode(value)),
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "deploymentId" -> implicitly[ArgEncoder[String]].encode(value.deploymentId),
+            "description" -> value.description.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "environment" -> value.environment.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "environmentUrl" -> value.environmentUrl.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "logUrl" -> value.logUrl.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[String]].encode(value)),
+            "state" -> implicitly[ArgEncoder[DeploymentStatusState]].encode(value.state)
+          ))
+      override def typeName: String = "CreateDeploymentStatusInput"
+    }
+  }
   case class CreateEnterpriseOrganizationInput(
     adminLogins: List[String] = Nil,
     billingEmail: String,
@@ -32495,6 +33792,28 @@ either curated or that have been selected automatically based on popularity.
             "title" -> implicitly[ArgEncoder[String]].encode(value.title)
           ))
       override def typeName: String = "CreateIssueInput"
+    }
+  }
+  case class CreateLabelInput(
+    clientMutationId: Option[String] = None,
+    color: String,
+    description: Option[String] = None,
+    name: String,
+    repositoryId: String)
+  object CreateLabelInput {
+    implicit val encoder: ArgEncoder[CreateLabelInput] = new ArgEncoder[CreateLabelInput] {
+      override def encode(value: CreateLabelInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "color" -> implicitly[ArgEncoder[String]].encode(value.color),
+            "description" -> value.description.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "name" -> implicitly[ArgEncoder[String]].encode(value.name),
+            "repositoryId" -> implicitly[ArgEncoder[String]].encode(value.repositoryId)
+          ))
+      override def typeName: String = "CreateLabelInput"
     }
   }
   case class CreateProjectInput(
@@ -32731,6 +34050,32 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "DeleteIssueInput"
     }
   }
+  case class DeleteLabelInput(clientMutationId: Option[String] = None, id: String)
+  object DeleteLabelInput {
+    implicit val encoder: ArgEncoder[DeleteLabelInput] = new ArgEncoder[DeleteLabelInput] {
+      override def encode(value: DeleteLabelInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "id" -> implicitly[ArgEncoder[String]].encode(value.id)
+          ))
+      override def typeName: String = "DeleteLabelInput"
+    }
+  }
+  case class DeletePackageVersionInput(clientMutationId: Option[String] = None, packageVersionId: String)
+  object DeletePackageVersionInput {
+    implicit val encoder: ArgEncoder[DeletePackageVersionInput] = new ArgEncoder[DeletePackageVersionInput] {
+      override def encode(value: DeletePackageVersionInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "packageVersionId" -> implicitly[ArgEncoder[String]].encode(value.packageVersionId)
+          ))
+      override def typeName: String = "DeletePackageVersionInput"
+    }
+  }
   case class DeleteProjectCardInput(cardId: String, clientMutationId: Option[String] = None)
   object DeleteProjectCardInput {
     implicit val encoder: ArgEncoder[DeleteProjectCardInput] = new ArgEncoder[DeleteProjectCardInput] {
@@ -32861,6 +34206,20 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "DeploymentOrder"
     }
   }
+  case class DisablePullRequestAutoMergeInput(clientMutationId: Option[String] = None, pullRequestId: String)
+  object DisablePullRequestAutoMergeInput {
+    implicit val encoder: ArgEncoder[DisablePullRequestAutoMergeInput] =
+      new ArgEncoder[DisablePullRequestAutoMergeInput] {
+        override def encode(value: DisablePullRequestAutoMergeInput): __Value =
+          __ObjectValue(
+            List(
+              "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "pullRequestId" -> implicitly[ArgEncoder[String]].encode(value.pullRequestId)
+            ))
+        override def typeName: String = "DisablePullRequestAutoMergeInput"
+      }
+  }
   case class DismissPullRequestReviewInput(
     clientMutationId: Option[String] = None,
     message: String,
@@ -32914,6 +34273,34 @@ either curated or that have been selected automatically based on popularity.
           ))
       override def typeName: String = "DraftPullRequestReviewThread"
     }
+  }
+  case class EnablePullRequestAutoMergeInput(
+    authorEmail: Option[String] = None,
+    clientMutationId: Option[String] = None,
+    commitBody: Option[String] = None,
+    commitHeadline: Option[String] = None,
+    mergeMethod: Option[PullRequestMergeMethod] = None,
+    pullRequestId: String)
+  object EnablePullRequestAutoMergeInput {
+    implicit val encoder: ArgEncoder[EnablePullRequestAutoMergeInput] =
+      new ArgEncoder[EnablePullRequestAutoMergeInput] {
+        override def encode(value: EnablePullRequestAutoMergeInput): __Value =
+          __ObjectValue(
+            List(
+              "authorEmail" -> value.authorEmail.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "commitBody" -> value.commitBody.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "commitHeadline" -> value.commitHeadline.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "mergeMethod" -> value.mergeMethod.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[PullRequestMergeMethod]].encode(value)),
+              "pullRequestId" -> implicitly[ArgEncoder[String]].encode(value.pullRequestId)
+            ))
+        override def typeName: String = "EnablePullRequestAutoMergeInput"
+      }
   }
   case class EnterpriseAdministratorInvitationOrder(
     direction: OrderDirection,
@@ -33020,6 +34407,30 @@ either curated or that have been selected automatically based on popularity.
             "direction" -> implicitly[ArgEncoder[OrderDirection]].encode(value.direction),
             "field" -> implicitly[ArgEncoder[GistOrderField]].encode(value.field)))
       override def typeName: String = "GistOrder"
+    }
+  }
+  case class ImportProjectInput(
+    body: Option[String] = None,
+    clientMutationId: Option[String] = None,
+    columnImports: List[ProjectColumnImport] = Nil,
+    name: String,
+    ownerName: String,
+    public: Option[Boolean] = None)
+  object ImportProjectInput {
+    implicit val encoder: ArgEncoder[ImportProjectInput] = new ArgEncoder[ImportProjectInput] {
+      override def encode(value: ImportProjectInput): __Value =
+        __ObjectValue(
+          List(
+            "body" -> value.body.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[String]].encode(value)),
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "columnImports" -> __ListValue(value.columnImports.map(value =>
+              implicitly[ArgEncoder[ProjectColumnImport]].encode(value))),
+            "name" -> implicitly[ArgEncoder[String]].encode(value.name),
+            "ownerName" -> implicitly[ArgEncoder[String]].encode(value.ownerName),
+            "public" -> value.public.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[Boolean]].encode(value))
+          ))
+      override def typeName: String = "ImportProjectInput"
     }
   }
   case class InviteEnterpriseAdminInput(
@@ -33375,6 +34786,44 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "PackageVersionOrder"
     }
   }
+  case class PinIssueInput(clientMutationId: Option[String] = None, issueId: String)
+  object PinIssueInput {
+    implicit val encoder: ArgEncoder[PinIssueInput] = new ArgEncoder[PinIssueInput] {
+      override def encode(value: PinIssueInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "issueId" -> implicitly[ArgEncoder[String]].encode(value.issueId)
+          ))
+      override def typeName: String = "PinIssueInput"
+    }
+  }
+  case class ProjectCardImport(number: Int, repository: String)
+  object ProjectCardImport {
+    implicit val encoder: ArgEncoder[ProjectCardImport] = new ArgEncoder[ProjectCardImport] {
+      override def encode(value: ProjectCardImport): __Value =
+        __ObjectValue(
+          List(
+            "number" -> implicitly[ArgEncoder[Int]].encode(value.number),
+            "repository" -> implicitly[ArgEncoder[String]].encode(value.repository)))
+      override def typeName: String = "ProjectCardImport"
+    }
+  }
+  case class ProjectColumnImport(columnName: String, issues: Option[List[ProjectCardImport]] = None, position: Int)
+  object ProjectColumnImport {
+    implicit val encoder: ArgEncoder[ProjectColumnImport] = new ArgEncoder[ProjectColumnImport] {
+      override def encode(value: ProjectColumnImport): __Value =
+        __ObjectValue(
+          List(
+            "columnName" -> implicitly[ArgEncoder[String]].encode(value.columnName),
+            "issues" -> value.issues.fold(__NullValue: __Value)(value =>
+              __ListValue(value.map(value => implicitly[ArgEncoder[ProjectCardImport]].encode(value)))),
+            "position" -> implicitly[ArgEncoder[Int]].encode(value.position)
+          ))
+      override def typeName: String = "ProjectColumnImport"
+    }
+  }
   case class ProjectOrder(direction: OrderDirection, field: ProjectOrderField)
   object ProjectOrder {
     implicit val encoder: ArgEncoder[ProjectOrder] = new ArgEncoder[ProjectOrder] {
@@ -33418,6 +34867,25 @@ either curated or that have been selected automatically based on popularity.
             "direction" -> implicitly[ArgEncoder[OrderDirection]].encode(value.direction),
             "field" -> implicitly[ArgEncoder[RefOrderField]].encode(value.field)))
       override def typeName: String = "RefOrder"
+    }
+  }
+  case class RefUpdate(
+    afterOid: GitObjectID,
+    beforeOid: Option[GitObjectID] = None,
+    force: Option[Boolean] = None,
+    name: GitRefname)
+  object RefUpdate {
+    implicit val encoder: ArgEncoder[RefUpdate] = new ArgEncoder[RefUpdate] {
+      override def encode(value: RefUpdate): __Value =
+        __ObjectValue(
+          List(
+            "afterOid" -> implicitly[ArgEncoder[GitObjectID]].encode(value.afterOid),
+            "beforeOid" -> value.beforeOid.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[GitObjectID]].encode(value)),
+            "force" -> value.force.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[Boolean]].encode(value)),
+            "name" -> implicitly[ArgEncoder[GitRefname]].encode(value.name)
+          ))
+      override def typeName: String = "RefUpdate"
     }
   }
   case class RegenerateEnterpriseIdentityProviderRecoveryCodesInput(
@@ -33843,6 +35311,18 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "SetUserInteractionLimitInput"
     }
   }
+  case class SponsorableOrder(direction: OrderDirection, field: SponsorableOrderField)
+  object SponsorableOrder {
+    implicit val encoder: ArgEncoder[SponsorableOrder] = new ArgEncoder[SponsorableOrder] {
+      override def encode(value: SponsorableOrder): __Value =
+        __ObjectValue(
+          List(
+            "direction" -> implicitly[ArgEncoder[OrderDirection]].encode(value.direction),
+            "field" -> implicitly[ArgEncoder[SponsorableOrderField]].encode(value.field)
+          ))
+      override def typeName: String = "SponsorableOrder"
+    }
+  }
   case class SponsorsTierOrder(direction: OrderDirection, field: SponsorsTierOrderField)
   object SponsorsTierOrder {
     implicit val encoder: ArgEncoder[SponsorsTierOrder] = new ArgEncoder[SponsorsTierOrder] {
@@ -34072,6 +35552,19 @@ either curated or that have been selected automatically based on popularity.
             "subjectId" -> implicitly[ArgEncoder[String]].encode(value.subjectId)
           ))
       override def typeName: String = "UnminimizeCommentInput"
+    }
+  }
+  case class UnpinIssueInput(clientMutationId: Option[String] = None, issueId: String)
+  object UnpinIssueInput {
+    implicit val encoder: ArgEncoder[UnpinIssueInput] = new ArgEncoder[UnpinIssueInput] {
+      override def encode(value: UnpinIssueInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "issueId" -> implicitly[ArgEncoder[String]].encode(value.issueId)
+          ))
+      override def typeName: String = "UnpinIssueInput"
     }
   }
   case class UnresolveReviewThreadInput(clientMutationId: Option[String] = None, threadId: String)
@@ -34616,6 +36109,46 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "UpdateIssueInput"
     }
   }
+  case class UpdateLabelInput(
+    clientMutationId: Option[String] = None,
+    color: Option[String] = None,
+    description: Option[String] = None,
+    id: String,
+    name: Option[String] = None)
+  object UpdateLabelInput {
+    implicit val encoder: ArgEncoder[UpdateLabelInput] = new ArgEncoder[UpdateLabelInput] {
+      override def encode(value: UpdateLabelInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "color" -> value.color.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[String]].encode(value)),
+            "description" -> value.description.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "id" -> implicitly[ArgEncoder[String]].encode(value.id),
+            "name" -> value.name.fold(__NullValue: __Value)(value => implicitly[ArgEncoder[String]].encode(value))
+          ))
+      override def typeName: String = "UpdateLabelInput"
+    }
+  }
+  case class UpdateNotificationRestrictionSettingInput(
+    clientMutationId: Option[String] = None,
+    ownerId: String,
+    settingValue: NotificationRestrictionSettingValue)
+  object UpdateNotificationRestrictionSettingInput {
+    implicit val encoder: ArgEncoder[UpdateNotificationRestrictionSettingInput] =
+      new ArgEncoder[UpdateNotificationRestrictionSettingInput] {
+        override def encode(value: UpdateNotificationRestrictionSettingInput): __Value =
+          __ObjectValue(
+            List(
+              "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "ownerId" -> implicitly[ArgEncoder[String]].encode(value.ownerId),
+              "settingValue" -> implicitly[ArgEncoder[NotificationRestrictionSettingValue]].encode(value.settingValue)
+            ))
+        override def typeName: String = "UpdateNotificationRestrictionSettingInput"
+      }
+  }
   case class UpdateProjectCardInput(
     clientMutationId: Option[String] = None,
     isArchived: Option[Boolean] = None,
@@ -34768,6 +36301,23 @@ either curated or that have been selected automatically based on popularity.
       override def typeName: String = "UpdateRefInput"
     }
   }
+  case class UpdateRefsInput(
+    clientMutationId: Option[String] = None,
+    refUpdates: List[RefUpdate] = Nil,
+    repositoryId: String)
+  object UpdateRefsInput {
+    implicit val encoder: ArgEncoder[UpdateRefsInput] = new ArgEncoder[UpdateRefsInput] {
+      override def encode(value: UpdateRefsInput): __Value =
+        __ObjectValue(
+          List(
+            "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+              implicitly[ArgEncoder[String]].encode(value)),
+            "refUpdates" -> __ListValue(value.refUpdates.map(value => implicitly[ArgEncoder[RefUpdate]].encode(value))),
+            "repositoryId" -> implicitly[ArgEncoder[String]].encode(value.repositoryId)
+          ))
+      override def typeName: String = "UpdateRefsInput"
+    }
+  }
   case class UpdateRepositoryInput(
     clientMutationId: Option[String] = None,
     description: Option[String] = None,
@@ -34864,6 +36414,36 @@ either curated or that have been selected automatically based on popularity.
           ))
       override def typeName: String = "UpdateTeamDiscussionInput"
     }
+  }
+  case class UpdateTeamReviewAssignmentInput(
+    algorithm: Option[TeamReviewAssignmentAlgorithm] = None,
+    clientMutationId: Option[String] = None,
+    enabled: Boolean,
+    excludedTeamMemberIds: Option[List[String]] = None,
+    id: String,
+    notifyTeam: Option[Boolean] = None,
+    teamMemberCount: Option[Int] = None)
+  object UpdateTeamReviewAssignmentInput {
+    implicit val encoder: ArgEncoder[UpdateTeamReviewAssignmentInput] =
+      new ArgEncoder[UpdateTeamReviewAssignmentInput] {
+        override def encode(value: UpdateTeamReviewAssignmentInput): __Value =
+          __ObjectValue(
+            List(
+              "algorithm" -> value.algorithm.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[TeamReviewAssignmentAlgorithm]].encode(value)),
+              "clientMutationId" -> value.clientMutationId.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[String]].encode(value)),
+              "enabled" -> implicitly[ArgEncoder[Boolean]].encode(value.enabled),
+              "excludedTeamMemberIds" -> value.excludedTeamMemberIds.fold(__NullValue: __Value)(value =>
+                __ListValue(value.map(value => implicitly[ArgEncoder[String]].encode(value)))),
+              "id" -> implicitly[ArgEncoder[String]].encode(value.id),
+              "notifyTeam" -> value.notifyTeam.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[Boolean]].encode(value)),
+              "teamMemberCount" -> value.teamMemberCount.fold(__NullValue: __Value)(value =>
+                implicitly[ArgEncoder[Int]].encode(value))
+            ))
+        override def typeName: String = "UpdateTeamReviewAssignmentInput"
+      }
   }
   case class UpdateTopicsInput(
     clientMutationId: Option[String] = None,
@@ -35075,6 +36655,7 @@ either curated or that have been selected automatically based on popularity.
       onBaseRefDeletedEvent: Option[SelectionBuilder[BaseRefDeletedEvent, A]] = None,
       onAutoMergeEnabledEvent: Option[SelectionBuilder[AutoMergeEnabledEvent, A]] = None,
       onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onCWE: Option[SelectionBuilder[CWE, A]] = None,
       onOauthApplicationCreateAuditEntry: Option[SelectionBuilder[OauthApplicationCreateAuditEntry, A]] = None,
       onSponsorsListing: Option[SelectionBuilder[SponsorsListing, A]] = None,
       onOrgConfigDisableCollaboratorsOnlyAuditEntry: Option[
@@ -35121,6 +36702,7 @@ either curated or that have been selected automatically based on popularity.
       onPackageTag: Option[SelectionBuilder[PackageTag, A]] = None,
       onRepoConfigEnableAnonymousGitAccessAuditEntry: Option[
         SelectionBuilder[RepoConfigEnableAnonymousGitAccessAuditEntry, A]] = None,
+      onPinnedIssue: Option[SelectionBuilder[PinnedIssue, A]] = None,
       onOrgUpdateMemberRepositoryCreationPermissionAuditEntry: Option[
         SelectionBuilder[OrgUpdateMemberRepositoryCreationPermissionAuditEntry, A]] = None,
       onTransferredEvent: Option[SelectionBuilder[TransferredEvent, A]] = None,
@@ -35212,6 +36794,7 @@ either curated or that have been selected automatically based on popularity.
       onUser: Option[SelectionBuilder[User, A]] = None,
       onTeamAddMemberAuditEntry: Option[SelectionBuilder[TeamAddMemberAuditEntry, A]] = None,
       onDeploymentEnvironmentChangedEvent: Option[SelectionBuilder[DeploymentEnvironmentChangedEvent, A]] = None,
+      onDependencyGraphManifest: Option[SelectionBuilder[DependencyGraphManifest, A]] = None,
       onMembersCanDeleteReposClearAuditEntry: Option[SelectionBuilder[MembersCanDeleteReposClearAuditEntry, A]] = None,
       onEnterpriseServerUserAccountsUpload: Option[SelectionBuilder[EnterpriseServerUserAccountsUpload, A]] = None,
       onAutoMergeDisabledEvent: Option[SelectionBuilder[AutoMergeDisabledEvent, A]] = None,
@@ -35293,6 +36876,7 @@ either curated or that have been selected automatically based on popularity.
             "BaseRefDeletedEvent" -> onBaseRefDeletedEvent,
             "AutoMergeEnabledEvent" -> onAutoMergeEnabledEvent,
             "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+            "CWE" -> onCWE,
             "OauthApplicationCreateAuditEntry" -> onOauthApplicationCreateAuditEntry,
             "SponsorsListing" -> onSponsorsListing,
             "OrgConfigDisableCollaboratorsOnlyAuditEntry" -> onOrgConfigDisableCollaboratorsOnlyAuditEntry,
@@ -35335,6 +36919,7 @@ either curated or that have been selected automatically based on popularity.
             "ProjectColumn" -> onProjectColumn,
             "PackageTag" -> onPackageTag,
             "RepoConfigEnableAnonymousGitAccessAuditEntry" -> onRepoConfigEnableAnonymousGitAccessAuditEntry,
+            "PinnedIssue" -> onPinnedIssue,
             "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" -> onOrgUpdateMemberRepositoryCreationPermissionAuditEntry,
             "TransferredEvent" -> onTransferredEvent,
             "RepositoryTopic" -> onRepositoryTopic,
@@ -35414,6 +36999,7 @@ either curated or that have been selected automatically based on popularity.
             "User" -> onUser,
             "TeamAddMemberAuditEntry" -> onTeamAddMemberAuditEntry,
             "DeploymentEnvironmentChangedEvent" -> onDeploymentEnvironmentChangedEvent,
+            "DependencyGraphManifest" -> onDependencyGraphManifest,
             "MembersCanDeleteReposClearAuditEntry" -> onMembersCanDeleteReposClearAuditEntry,
             "EnterpriseServerUserAccountsUpload" -> onEnterpriseServerUserAccountsUpload,
             "AutoMergeDisabledEvent" -> onAutoMergeDisabledEvent,
@@ -35491,6 +37077,7 @@ either curated or that have been selected automatically based on popularity.
       onBaseRefDeletedEvent: Option[SelectionBuilder[BaseRefDeletedEvent, A]] = None,
       onAutoMergeEnabledEvent: Option[SelectionBuilder[AutoMergeEnabledEvent, A]] = None,
       onEnterpriseUserAccount: Option[SelectionBuilder[EnterpriseUserAccount, A]] = None,
+      onCWE: Option[SelectionBuilder[CWE, A]] = None,
       onOauthApplicationCreateAuditEntry: Option[SelectionBuilder[OauthApplicationCreateAuditEntry, A]] = None,
       onSponsorsListing: Option[SelectionBuilder[SponsorsListing, A]] = None,
       onOrgConfigDisableCollaboratorsOnlyAuditEntry: Option[
@@ -35537,6 +37124,7 @@ either curated or that have been selected automatically based on popularity.
       onPackageTag: Option[SelectionBuilder[PackageTag, A]] = None,
       onRepoConfigEnableAnonymousGitAccessAuditEntry: Option[
         SelectionBuilder[RepoConfigEnableAnonymousGitAccessAuditEntry, A]] = None,
+      onPinnedIssue: Option[SelectionBuilder[PinnedIssue, A]] = None,
       onOrgUpdateMemberRepositoryCreationPermissionAuditEntry: Option[
         SelectionBuilder[OrgUpdateMemberRepositoryCreationPermissionAuditEntry, A]] = None,
       onTransferredEvent: Option[SelectionBuilder[TransferredEvent, A]] = None,
@@ -35628,6 +37216,7 @@ either curated or that have been selected automatically based on popularity.
       onUser: Option[SelectionBuilder[User, A]] = None,
       onTeamAddMemberAuditEntry: Option[SelectionBuilder[TeamAddMemberAuditEntry, A]] = None,
       onDeploymentEnvironmentChangedEvent: Option[SelectionBuilder[DeploymentEnvironmentChangedEvent, A]] = None,
+      onDependencyGraphManifest: Option[SelectionBuilder[DependencyGraphManifest, A]] = None,
       onMembersCanDeleteReposClearAuditEntry: Option[SelectionBuilder[MembersCanDeleteReposClearAuditEntry, A]] = None,
       onEnterpriseServerUserAccountsUpload: Option[SelectionBuilder[EnterpriseServerUserAccountsUpload, A]] = None,
       onAutoMergeDisabledEvent: Option[SelectionBuilder[AutoMergeDisabledEvent, A]] = None,
@@ -35709,6 +37298,7 @@ either curated or that have been selected automatically based on popularity.
             "BaseRefDeletedEvent" -> onBaseRefDeletedEvent,
             "AutoMergeEnabledEvent" -> onAutoMergeEnabledEvent,
             "EnterpriseUserAccount" -> onEnterpriseUserAccount,
+            "CWE" -> onCWE,
             "OauthApplicationCreateAuditEntry" -> onOauthApplicationCreateAuditEntry,
             "SponsorsListing" -> onSponsorsListing,
             "OrgConfigDisableCollaboratorsOnlyAuditEntry" -> onOrgConfigDisableCollaboratorsOnlyAuditEntry,
@@ -35751,6 +37341,7 @@ either curated or that have been selected automatically based on popularity.
             "ProjectColumn" -> onProjectColumn,
             "PackageTag" -> onPackageTag,
             "RepoConfigEnableAnonymousGitAccessAuditEntry" -> onRepoConfigEnableAnonymousGitAccessAuditEntry,
+            "PinnedIssue" -> onPinnedIssue,
             "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" -> onOrgUpdateMemberRepositoryCreationPermissionAuditEntry,
             "TransferredEvent" -> onTransferredEvent,
             "RepositoryTopic" -> onRepositoryTopic,
@@ -35830,6 +37421,7 @@ either curated or that have been selected automatically based on popularity.
             "User" -> onUser,
             "TeamAddMemberAuditEntry" -> onTeamAddMemberAuditEntry,
             "DeploymentEnvironmentChangedEvent" -> onDeploymentEnvironmentChangedEvent,
+            "DependencyGraphManifest" -> onDependencyGraphManifest,
             "MembersCanDeleteReposClearAuditEntry" -> onMembersCanDeleteReposClearAuditEntry,
             "EnterpriseServerUserAccountsUpload" -> onEnterpriseServerUserAccountsUpload,
             "AutoMergeDisabledEvent" -> onAutoMergeDisabledEvent,
@@ -36056,6 +37648,33 @@ either curated or that have been selected automatically based on popularity.
         )
       )
     /**
+      * Users and organizations who can be sponsored via GitHub Sponsors.
+      */
+    def sponsorables[A](
+      after: Option[String] = None,
+      before: Option[String] = None,
+      dependencyEcosystem: Option[SecurityAdvisoryEcosystem] = None,
+      first: Option[Int] = None,
+      last: Option[Int] = None,
+      onlyDependencies: Option[Boolean] = None,
+      orderBy: Option[SponsorableOrder] = None,
+      orgLoginForDependencies: Option[String] = None)(
+      innerSelection: SelectionBuilder[SponsorableItemConnection, A]): SelectionBuilder[RootQuery, A] =
+      Field(
+        "sponsorables",
+        Obj(innerSelection),
+        arguments = List(
+          Argument("after", after),
+          Argument("before", before),
+          Argument("dependencyEcosystem", dependencyEcosystem),
+          Argument("first", first),
+          Argument("last", last),
+          Argument("onlyDependencies", onlyDependencies),
+          Argument("orderBy", orderBy),
+          Argument("orgLoginForDependencies", orgLoginForDependencies)
+        )
+      )
+    /**
       * Look up a single Sponsors Listing
       */
     @deprecated(
@@ -36178,6 +37797,12 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[AddVerifiableDomainPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("addVerifiableDomain", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Approve a verifiable domain for notification delivery.
+      */
+    def approveVerifiableDomain[A](input: ApproveVerifiableDomainInput)(
+      innerSelection: SelectionBuilder[ApproveVerifiableDomainPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("approveVerifiableDomain", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Marks a repository as archived.
       */
     def archiveRepository[A](input: ArchiveRepositoryInput)(
@@ -36237,6 +37862,13 @@ either curated or that have been selected automatically based on popularity.
       : SelectionBuilder[RootMutation, Option[A]] =
       Field("convertProjectCardNoteToIssue", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Converts a pull request to draft
+      */
+    def convertPullRequestToDraft[A](input: ConvertPullRequestToDraftInput)(
+      innerSelection: SelectionBuilder[ConvertPullRequestToDraftPayload, A])
+      : SelectionBuilder[RootMutation, Option[A]] =
+      Field("convertPullRequestToDraft", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Create a new branch protection rule
       */
     def createBranchProtectionRule[A](input: CreateBranchProtectionRuleInput)(
@@ -36256,6 +37888,24 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[CreateCheckSuitePayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("createCheckSuite", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Create a content attachment.
+      */
+    def createContentAttachment[A](input: CreateContentAttachmentInput)(
+      innerSelection: SelectionBuilder[CreateContentAttachmentPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("createContentAttachment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Creates a new deployment event.
+      */
+    def createDeployment[A](input: CreateDeploymentInput)(
+      innerSelection: SelectionBuilder[CreateDeploymentPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("createDeployment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Create a deployment status.
+      */
+    def createDeploymentStatus[A](input: CreateDeploymentStatusInput)(
+      innerSelection: SelectionBuilder[CreateDeploymentStatusPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("createDeploymentStatus", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Creates an organization as part of an enterprise account.
       */
     def createEnterpriseOrganization[A](input: CreateEnterpriseOrganizationInput)(
@@ -36274,6 +37924,12 @@ either curated or that have been selected automatically based on popularity.
     def createIssue[A](input: CreateIssueInput)(
       innerSelection: SelectionBuilder[CreateIssuePayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("createIssue", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Creates a new label.
+      */
+    def createLabel[A](input: CreateLabelInput)(
+      innerSelection: SelectionBuilder[CreateLabelPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("createLabel", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
       * Creates a new project.
       */
@@ -36349,6 +38005,18 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[DeleteIssueCommentPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("deleteIssueComment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Deletes a label.
+      */
+    def deleteLabel[A](input: DeleteLabelInput)(
+      innerSelection: SelectionBuilder[DeleteLabelPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("deleteLabel", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Delete a package version.
+      */
+    def deletePackageVersion[A](input: DeletePackageVersionInput)(
+      innerSelection: SelectionBuilder[DeletePackageVersionPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("deletePackageVersion", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Deletes a project.
       */
     def deleteProject[A](input: DeleteProjectInput)(
@@ -36405,17 +38073,37 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[DeleteVerifiableDomainPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("deleteVerifiableDomain", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Disable auto merge on the given pull request
+      */
+    def disablePullRequestAutoMerge[A](input: DisablePullRequestAutoMergeInput)(
+      innerSelection: SelectionBuilder[DisablePullRequestAutoMergePayload, A])
+      : SelectionBuilder[RootMutation, Option[A]] =
+      Field("disablePullRequestAutoMerge", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Dismisses an approved or rejected pull request review.
       */
     def dismissPullRequestReview[A](input: DismissPullRequestReviewInput)(
       innerSelection: SelectionBuilder[DismissPullRequestReviewPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("dismissPullRequestReview", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Enable the default auto-merge on a pull request.
+      */
+    def enablePullRequestAutoMerge[A](input: EnablePullRequestAutoMergeInput)(
+      innerSelection: SelectionBuilder[EnablePullRequestAutoMergePayload, A])
+      : SelectionBuilder[RootMutation, Option[A]] =
+      Field("enablePullRequestAutoMerge", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Follow a user.
       */
     def followUser[A](input: FollowUserInput)(
       innerSelection: SelectionBuilder[FollowUserPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("followUser", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Creates a new project by importing columns and a list of issues/PRs.
+      */
+    def importProject[A](input: ImportProjectInput)(
+      innerSelection: SelectionBuilder[ImportProjectPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("importProject", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
       * Invite someone to become an administrator of the enterprise.
       */
@@ -36477,6 +38165,12 @@ either curated or that have been selected automatically based on popularity.
     def moveProjectColumn[A](input: MoveProjectColumnInput)(
       innerSelection: SelectionBuilder[MoveProjectColumnPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("moveProjectColumn", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Pin an issue to a repository
+      */
+    def pinIssue[A](input: PinIssueInput)(
+      innerSelection: SelectionBuilder[PinIssuePayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("pinIssue", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
       * Regenerates the identity provider recovery codes for an enterprise
       */
@@ -36680,6 +38374,12 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[UnminimizeCommentPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("unminimizeComment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Unpin a pinned issue from a repository
+      */
+    def unpinIssue[A](input: UnpinIssueInput)(
+      innerSelection: SelectionBuilder[UnpinIssuePayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("unpinIssue", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Marks a review thread as unresolved.
       */
     def unresolveReviewThread[A](input: UnresolveReviewThreadInput)(
@@ -36727,7 +38427,7 @@ either curated or that have been selected automatically based on popularity.
         OptionOf(Obj(innerSelection)),
         arguments = List(Argument("input", input)))
     /**
-      * Sets the default repository permission for organizations in an enterprise.
+      * Sets the base repository permission for organizations in an enterprise.
       */
     def updateEnterpriseDefaultRepositoryPermissionSetting[A](
       input: UpdateEnterpriseDefaultRepositoryPermissionSettingInput)(
@@ -36899,6 +38599,22 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[UpdateIssueCommentPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("updateIssueComment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Updates an existing label.
+      */
+    def updateLabel[A](input: UpdateLabelInput)(
+      innerSelection: SelectionBuilder[UpdateLabelPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("updateLabel", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Update the setting to restrict notifications to only verified or approved domains available to an owner.
+      */
+    def updateNotificationRestrictionSetting[A](input: UpdateNotificationRestrictionSettingInput)(
+      innerSelection: SelectionBuilder[UpdateNotificationRestrictionSettingPayload, A])
+      : SelectionBuilder[RootMutation, Option[A]] =
+      Field(
+        "updateNotificationRestrictionSetting",
+        OptionOf(Obj(innerSelection)),
+        arguments = List(Argument("input", input)))
+    /**
       * Updates an existing project.
       */
     def updateProject[A](input: UpdateProjectInput)(
@@ -36942,6 +38658,29 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[UpdateRefPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
       Field("updateRef", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
+      * Creates, updates and/or deletes multiple refs in a repository.
+
+This mutation takes a list of `RefUpdate`s and performs these updates
+on the repository. All updates are performed atomically, meaning that
+if one of them is rejected, no other ref will be modified.
+
+`RefUpdate.beforeOid` specifies that the given reference needs to point
+to the given value before performing any updates. A value of
+`0000000000000000000000000000000000000000` can be used to verify that
+the references should not exist.
+
+`RefUpdate.afterOid` specifies the value that the given reference
+will point to after performing all updates. A value of
+`0000000000000000000000000000000000000000` can be used to delete a
+reference.
+
+If `RefUpdate.force` is set to `true`, a non-fast-forward updates
+for the given reference will be allowed.
+      */
+    def updateRefs[A](input: UpdateRefsInput)(
+      innerSelection: SelectionBuilder[UpdateRefsPayload, A]): SelectionBuilder[RootMutation, Option[A]] =
+      Field("updateRefs", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
       * Update information about a repository.
       */
     def updateRepository[A](input: UpdateRepositoryInput)(
@@ -36966,6 +38705,13 @@ either curated or that have been selected automatically based on popularity.
       innerSelection: SelectionBuilder[UpdateTeamDiscussionCommentPayload, A])
       : SelectionBuilder[RootMutation, Option[A]] =
       Field("updateTeamDiscussionComment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
+    /**
+      * Updates team review assignment.
+      */
+    def updateTeamReviewAssignment[A](input: UpdateTeamReviewAssignmentInput)(
+      innerSelection: SelectionBuilder[UpdateTeamReviewAssignmentPayload, A])
+      : SelectionBuilder[RootMutation, Option[A]] =
+      Field("updateTeamReviewAssignment", OptionOf(Obj(innerSelection)), arguments = List(Argument("input", input)))
     /**
       * Replaces the repository's topics with the given topics.
       */
